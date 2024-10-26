@@ -2,6 +2,8 @@ package repository;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
 import domain.Entity;
 import domain.validators.ValidationException;
 import domain.validators.Validator;
@@ -31,11 +33,11 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
      * @throws IllegalArgumentException if the provided ID is null
      */
     @Override
-    public E findOne(ID id) {
+    public Optional<E> findOne(ID id) {
         if (id == null) {
             throw new IllegalArgumentException("id must be not null");
         } else {
-            return this.entities.get(id);
+            return Optional.ofNullable(entities.get(id));
         }
     }
 
@@ -56,17 +58,12 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
      * @throws ValidationException if the entity is invalid
      */
     @Override
-    public E save(E entity) throws ValidationException {
+    public Optional<E> save(E entity) throws ValidationException {
         if (entity == null) {
             throw new IllegalArgumentException("ENTITY CANNOT BE NULL");
         } else {
             this.validator.validate(entity); // Validate the entity before saving
-            if (this.entities.containsKey(entity.getId())) {
-                return entity; // Entity already exists
-            } else {
-                this.entities.put(entity.getId(), entity); // Save the new entity
-                return null; // Indicate successful save
-            }
+            return Optional.ofNullable(entities.putIfAbsent(entity.getId(),entity));
         }
     }
 
@@ -77,11 +74,11 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
      * @throws IllegalArgumentException if the provided ID is null
      */
     @Override
-    public E delete(ID id) {
+    public Optional<E> delete(ID id) {
         if (id == null) {
             throw new IllegalArgumentException("id must be not null!");
         } else {
-            return this.entities.remove(id); // Remove and return the entity
+            return Optional.ofNullable(entities.remove(id));
         }
     }
 
@@ -93,16 +90,16 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
      * @throws ValidationException if the entity is invalid
      */
     @Override
-    public E update(E entity) {
+    public Optional<E> update(E entity) {
         if (entity == null) {
             throw new IllegalArgumentException("entity must not be null!");
         } else {
             this.validator.validate(entity); // Validate the entity before updating
             if (this.entities.containsKey(entity.getId())) {
                 this.entities.put(entity.getId(), entity); // Update the existing entity
-                return entity; // Return the updated entity
+                return Optional.of(entity); // Return the updated entity
             } else {
-                return null; // Entity not found
+                return Optional.empty(); // Entity not found
             }
         }
     }

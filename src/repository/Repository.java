@@ -1,45 +1,64 @@
 package repository;
 
 import domain.Entity;
+import domain.validators.ValidationException;
+
+import java.util.Optional;
 
 /**
- * Interface for a generic repository to perform CRUD operations on entities.
- * @param <ID> the type of the unique identifier for the entities
- * @param <E> the type of entities stored in the repository, extending Entity<ID>
+ * CRUD operations repository interface
+ * @param <ID> - type E must have an attribute of type ID
+ * @param <E> - type of entities saved in repository
  */
 public interface Repository<ID, E extends Entity<ID>> {
-
     /**
-     * Finds an entity by its unique identifier.
-     * @param id the unique identifier of the entity to find
-     * @return the entity with the specified ID, or null if not found
+     *
+     * @param id -the id of the entity to be returned
+     * id must not be null
+     * @return an {@code Optional} encapsulating the entity with the given id
+     * @throws IllegalArgumentException
+     * if id is null.
      */
-    E findOne(ID id);
-
+    Optional<E> findOne(ID id);
     /**
-     * Retrieves all entities in the repository.
-     * @return an iterable collection of all entities
+     *
+     * @return all entities
      */
     Iterable<E> findAll();
-
     /**
-     * Saves a new entity to the repository.
-     * @param entity the entity to save
-     * @return the saved entity
+     *
+     * @param entity
+     * entity must be not null
+     * @return an {@code Optional} - null if the entity was saved,
+     * - the entity (id already exists)
+     * @throws ValidationException
+     * if the entity is not valid
+     * @throws IllegalArgumentException
+     * if the given entity is null. *
      */
-    E save(E entity);
-
+    Optional<E> save(E entity);
     /**
-     * Deletes an entity from the repository by its unique identifier.
-     * @param id the unique identifier of the entity to delete
-     * @return the deleted entity, or null if not found
+     * removes the entity with the specified id
+     * @param id
+     * id must be not null
+     * @return an {@code Optional}
+     * - null if there is no entity with the given id,
+     * - the removed entity, otherwise
+     * @throws IllegalArgumentException
+     * if the given id is null.
      */
-    E delete(ID id);
-
+    Optional<E> delete(ID id);
     /**
-     * Updates an existing entity in the repository.
-     * @param entity the entity with updated information
-     * @return the updated entity
+     *
+     * @param entity
+     * entity must not be null
+     * @return an {@code Optional}
+     * - null if the entity was updated
+     * - otherwise (e.g. id does not exist) returns the entity.
+     * @throws IllegalArgumentException
+     * if the given entity is null.
+     * @throws ValidationException
+     * if the entity is not valid.
      */
-    E update(E entity);
+    Optional<E> update(E entity);
 }

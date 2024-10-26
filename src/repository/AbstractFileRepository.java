@@ -5,6 +5,7 @@ import domain.validators.ValidationException;
 import domain.validators.Validator;
 
 import java.io.*;
+import java.util.Optional;
 
 /**
  * Abstract class for a file-based repository that extends the in-memory repository.
@@ -62,7 +63,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
      * @return the entity with the specified ID, or null if not found
      */
     @Override
-    public E findOne(ID id) {
+    public Optional<E> findOne(ID id) {
         return super.findOne(id); // Delegate to the in-memory repository
     }
 
@@ -82,8 +83,8 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
      * @throws ValidationException if the entity is invalid
      */
     @Override
-    public E save(E entity) {
-        E existingEntity = super.save(entity); // Save the entity in memory
+    public Optional<E> save(E entity) {
+        Optional<E> existingEntity = super.save(entity); // Save the entity in memory
         if (existingEntity == null) {
             this.writeToFile(); // Write changes to the file if saved successfully
         }
@@ -111,8 +112,8 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
      * @return the deleted entity, or null if not found
      */
     @Override
-    public E delete(ID id) {
-        E deletedEntity = super.delete(id); // Delete from the in-memory repository
+    public Optional<E> delete(ID id) {
+        Optional<E> deletedEntity = super.delete(id); // Delete from the in-memory repository
         if (deletedEntity != null) {
             System.out.println(deletedEntity);
             this.writeToFile(); // Write changes to the file if deleted successfully
@@ -126,8 +127,8 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
      * @return the updated entity if it was found and updated, null if not found
      */
     @Override
-    public E update(E entity) {
-        E updatedEntity = super.update(entity); // Update in the in-memory repository
+    public Optional<E> update(E entity) {
+        Optional<E> updatedEntity = super.update(entity); // Update in the in-memory repository
         if (updatedEntity == null) {
             this.writeToFile(); // Write changes to the file if updated successfully
         }

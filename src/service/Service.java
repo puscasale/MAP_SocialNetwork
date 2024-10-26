@@ -68,7 +68,7 @@ public class Service {
      * @param user the User entity to be added
      * @return the saved User entity
      */
-    public User addUser(User user) {
+    public Optional<User> addUser(User user) {
         userValidator.validate(user);
         return userRepo.save(user);
     }
@@ -78,15 +78,20 @@ public class Service {
      * @param id the ID of the user to be removed
      */
     public void removeUser(Long id) {
-        User user = userRepo.findOne(id); // Find the user by ID
+        Optional<User> optionalUser = userRepo.findOne(id); // Find the user by ID
 
-        for (int i = user.getFriends().size() - 1; i >= 0; i--) {
-            User friend = user.getFriends().get(i);
-            removeFriendship(id, friend.getId());
-        }
-        adjList.remove(id); // Remove the user from the adjacency list
-        userRepo.delete(id); // Delete the user from the repository
+        optionalUser.ifPresent(user -> {
+            // Remove friendships
+            for (int i = user.getFriends().size() - 1; i >= 0; i--) {
+                User friend = user.getFriends().get(i);
+                removeFriendship(id, friend.getId());
+            }
+
+            adjList.remove(id); // Remove the user from the adjacency list
+            userRepo.delete(id); // Delete the user from the repository
+        });
     }
+
 
     /**
      * Adds a friendship between two users.
@@ -94,23 +99,30 @@ public class Service {
      * @param userId2 the ID of the second user
      * @return the saved Friendship entity
      */
-    public Friendship addFriendship(Long userId1, Long userId2) {
-        User u1 = userRepo.findOne(userId1); // Find the first user
-        User u2 = userRepo.findOne(userId2); // Find the second user
-
-        Friendship friendship = new Friendship(userId1, userId2);// Create a new Friendship entity
-        friendshipValidator.validate(friendship);
-
-        u1.addFriend(u2); // Add each other as friends
-        u2.addFriend(u1);
-
-        // Update the adjacency list
-        adjList.computeIfAbsent(userId1, k -> new ArrayList<>()).add(userId2);
-        adjList.computeIfAbsent(userId2, k -> new ArrayList<>()).add(userId1);
+    public Optional<Friendship> addFriendship(Long userId1, Long userId2) {
+        Optional<User> u1 = userRepo.findOne(userId1); // Find the first user
+        Optional<User> u2 = userRepo.findOne(userId2); // Find the second user
 
 
-        friendship.setId(new Tuple<>(userId1, userId2)); // Set its ID
-        return friendshipRepo.save(friendship); // Save the friendship
+        if(u1.isPresent() && u2.isPresent()) {
+            User friend1 = u1.get();
+            User friend2 = u2.get();
+            Friendship friendship = new Friendship(userId1, userId2);// Create a new Friendship entity
+            friendshipValidator.validate(friendship);
+            friend1.addFriend(friend2); // Add each other as friends
+            friend2.addFriend(friend1);
+
+            // Update the adjacency list
+            adjList.computeIfAbsent(userId1, k -> new ArrayList<>()).add(userId2);
+            adjList.computeIfAbsent(userId2, k -> new ArrayList<>()).add(userId1);
+
+            friendship.setId(new Tuple<>(userId1, userId2)); // Set its ID
+            return friendshipRepo.save(friendship); // Save the friendship
+        }
+        else {
+            throw new IllegalArgumentException("Both users must exist to create a friendship."); // Handle case where one or both users do not exist
+        }
+
     }
 
     /**
@@ -119,18 +131,26 @@ public class Service {
      * @param userId2 the ID of the second user
      */
     public void removeFriendship(Long userId1, Long userId2) {
-        User u1 = userRepo.findOne(userId1); // Find the first user
-        User u2 = userRepo.findOne(userId2); // Find the second user
+        Optional<User> u1 = userRepo.findOne(userId1); // Find the first user
+        Optional<User> u2 = userRepo.findOne(userId2); // Find the second user
 
-        u1.removeFriend(u2); // Remove each other from their friends
-        u2.removeFriend(u1);
+        if(u1.isPresent() && u2.isPresent()) {
+            User friend1 = u1.get();
+            User friend2 = u2.get();
 
-        // Update the adjacency list
-        adjList.get(userId1).remove(userId2);
-        adjList.get(userId2).remove(userId1);
+            friend1.removeFriend(friend2); // Remove each other from their friends
+            friend2.removeFriend(friend1);
 
-        friendshipRepo.delete(new Tuple<>(userId1, userId2)); // Delete the friendship from the repository
-        System.out.println("Friendship removed between " + userId1 + " and " + userId2);
+            // Update the adjacency list
+            adjList.get(userId1).remove(userId2);
+            adjList.get(userId2).remove(userId1);
+
+            friendshipRepo.delete(new Tuple<>(userId1, userId2)); // Delete the friendship from the repository
+            System.out.println("Friendship removed between " + userId1 + " and " + userId2);
+        }
+
+
+
     }
 
     /**
@@ -142,9 +162,9 @@ public class Service {
             Long userId2 = f.getIdUser2(); // Get the second user ID
             for (User u : userRepo.findAll()) {
                 if (u.getId().equals(userId1)) {
-                    u.addFriend(userRepo.findOne(userId2)); // Add friend if it matches
+                    u.addFriend(userRepo.findOne(userId2).get()); // Add friend if it matches
                 } else if (u.getId().equals(userId2)) {
-                    u.addFriend(userRepo.findOne(userId1)); // Add friend if it matches
+                    u.addFriend(userRepo.findOne(userId1).get()); // Add friend if it matches
                 }
             }
         }
