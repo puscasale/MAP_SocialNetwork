@@ -13,7 +13,7 @@ import java.util.Scanner;
  */
 public class Console {
 
-    private Service service; // Service layer for handling business logic
+    private final Service service; // Service layer for handling business logic
 
     /**
      * Constructor for Console class.

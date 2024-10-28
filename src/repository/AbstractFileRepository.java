@@ -115,7 +115,6 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
     public Optional<E> delete(ID id) {
         Optional<E> deletedEntity = super.delete(id); // Delete from the in-memory repository
         if (deletedEntity != null) {
-            System.out.println(deletedEntity);
             this.writeToFile(); // Write changes to the file if deleted successfully
         }
         return deletedEntity; // Return the deleted entity or null
