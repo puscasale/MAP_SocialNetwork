@@ -110,11 +110,11 @@ public class Service {
             Friendship f = new Friendship(userId1, userId2);
             f.setId(new Tuple<>(userId1, userId2));
 
+            friendshipRepo.save(f);
+
             // Update the adjacency list
             adjList.computeIfAbsent(userId1, k -> new ArrayList<>()).add(userId2);
             adjList.computeIfAbsent(userId2, k -> new ArrayList<>()).add(userId1);
-
-            friendshipRepo.save(f);
         }));
     }
 
@@ -125,19 +125,19 @@ public class Service {
      * @param userId2 the ID of the second user
      */
     public void removeFriendship(Long userId1, Long userId2) {
-        userRepo.findOne(userId1).ifPresent(u1 ->
-                userRepo.findOne(userId2).ifPresent(u2 -> {
-                    u1.removeFriend(u2);
-                    u2.removeFriend(u1);
+        Optional<User> u1 = userRepo.findOne(userId1);
+        Optional<User> u2 = userRepo.findOne(userId2);
+        u1.ifPresent(user1 -> u2.ifPresent(user2 -> {
+            user2.removeFriend(user1);
+            user1.removeFriend(user2);
 
-                    // Update adjacency list
-                    adjList.getOrDefault(userId1, new ArrayList<>()).remove(userId2);
-                    adjList.getOrDefault(userId2, new ArrayList<>()).remove(userId1);
+            friendshipRepo.delete(new Tuple<>(userId1, userId2));
 
-                    friendshipRepo.delete(new Tuple<>(userId1, userId2));
-                    System.out.println("Friendship removed between " + userId1 + " and " + userId2);
-                })
-        );
+            adjList.getOrDefault(userId1, new ArrayList<>()).remove(userId2);
+            adjList.getOrDefault(userId2, new ArrayList<>()).remove(userId1);
+
+            System.out.println("Friendship removed between " + userId1 + " and " + userId2);
+        }));
     }
 
 

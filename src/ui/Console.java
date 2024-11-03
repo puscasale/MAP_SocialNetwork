@@ -133,7 +133,6 @@ public class Console {
         Scanner scan = new Scanner(System.in);
         System.out.println("Id: ");
 
-
         try {
             Long id = Long.parseLong(scan.nextLine()); // Read user ID
             service.removeUser(id); // Remove the user via the service

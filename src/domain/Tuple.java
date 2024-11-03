@@ -69,14 +69,23 @@ public class Tuple<E1, E2> {
      * @return true if the object is a tuple with equal elements, false otherwise
      */
     public boolean equals(Object obj) {
-        return this.e1.equals(((Tuple)obj).e1) && this.e2.equals(((Tuple)obj).e2);
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Tuple<?, ?> other = (Tuple<?, ?>) obj;
+        return (Objects.equals(e1, other.e1) && Objects.equals(e2, other.e2)) ||
+                (Objects.equals(e1, other.e2) && Objects.equals(e2, other.e1));
     }
 
     /**
      * Generates a hash code for the tuple based on its elements.
      * @return a hash code value for this tuple
      */
+    @Override
     public int hashCode() {
-        return Objects.hash(this.e1, this.e2);
+        return Objects.hash(e1) + Objects.hash(e2);
     }
 }

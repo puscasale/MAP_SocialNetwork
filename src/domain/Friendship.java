@@ -1,6 +1,7 @@
 package domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Represents a Friendship between two users, each identified by a unique Long ID.
@@ -44,4 +45,32 @@ public class Friendship extends Entity<Tuple<Long, Long>> {
     public LocalDateTime getDate() {
         return this.date;
     }
+
+
+    /**
+     * Checks if this Friendship object is equal to another object.
+     * Two Friendship objects are considered equal if they have the same ID.
+     *
+     * @param o the object to compare with this Friendship
+     * @return true if the given object is also a Friendship with the same ID, false otherwise
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true; // Checks if both references point to the same object
+        if (!(o instanceof Friendship)) return false; // Checks if o is of the same type
+        Friendship that = (Friendship) o;
+        return Objects.equals(getId(), that.getId()); // Compares IDs for equality
+    }
+
+    /**
+     * Generates a hash code for this Friendship object based on its ID.
+     * The hash code is used in hashing data structures such as HashMap.
+     *
+     * @return the hash code value for this Friendship object
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId()); // Generates hash based on the ID of the friendship
+    }
+
 }

@@ -113,9 +113,7 @@ public class User extends Entity<Long> {
             return false;
         } else {
             User that = (User) o;
-            return this.getFirstName().equals(that.getFirstName()) &&
-                    this.getLastName().equals(that.getLastName()) &&
-                    this.getFriends().equals(that.getFriends());
+            return Objects.equals(getId(), that.getId());
         }
     }
 
@@ -123,7 +121,8 @@ public class User extends Entity<Long> {
      * Generates a hash code for the user based on their name and friends list.
      * @return a hash code value for this user
      */
+    @Override
     public int hashCode() {
-        return Objects.hash(this.getFirstName(), this.getLastName(), this.getFriends());
+        return Objects.hash(getId());
     }
 }

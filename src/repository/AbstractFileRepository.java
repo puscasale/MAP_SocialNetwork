@@ -35,7 +35,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
             String line;
             // Read each line from the file and create an entity
             while ((line = br.readLine()) != null) {
-                E entity = this.createEntity(line);
+                E entity = createEntity(line);
                 super.save(entity); // Save the entity to the in-memory repository
             }
         } catch (IOException e) {
@@ -85,7 +85,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
     @Override
     public Optional<E> save(E entity) {
         Optional<E> existingEntity = super.save(entity); // Save the entity in memory
-        if (existingEntity == null) {
+        if (existingEntity.isEmpty()) {
             this.writeToFile(); // Write changes to the file if saved successfully
         }
         return existingEntity; // Return the existing entity or null
@@ -114,7 +114,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
     @Override
     public Optional<E> delete(ID id) {
         Optional<E> deletedEntity = super.delete(id); // Delete from the in-memory repository
-        if (deletedEntity != null) {
+        if (deletedEntity.isPresent()) {
             this.writeToFile(); // Write changes to the file if deleted successfully
         }
         return deletedEntity; // Return the deleted entity or null
