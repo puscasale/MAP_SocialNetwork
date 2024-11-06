@@ -1,5 +1,6 @@
 package ui;
 
+import domain.Friendship;
 import domain.User;
 import domain.validators.ValidationException;
 import service.Service;
@@ -91,9 +92,8 @@ public class Console {
     void printUsers() {
         System.out.println("\t\t\tUSERS\t\t\t");
         Iterable<User> users = service.getUsers(); // Retrieve all users
-
         for (User u : users) {
-            System.out.println(u); // Print each user
+            System.out.println(u);
         }
     }
 
@@ -103,8 +103,6 @@ public class Console {
     void addUser() {
         System.out.println("Add user");
         Scanner scan = new Scanner(System.in);
-        System.out.println("ID: ");
-        String id = scan.nextLine(); // Read user ID
         System.out.println("First name: ");
         String firstName = scan.nextLine(); // Read first name
         System.out.println("Last name: ");
@@ -112,13 +110,11 @@ public class Console {
 
         try {
             User user = new User(firstName, lastName); // Create a new User
-            user.setId(Long.valueOf(id)); // Set the user ID
             service.addUser(user); // Add the user via the service
             System.out.println("User added successfully!"); // Success message
         } catch (ValidationException e) {
             System.out.println("Invalid user: " + e.getMessage()); // Error message
-        }  catch (NumberFormatException e) {
-            System.out.println("Invalid input: ID must be a number.");  // Handle non-numeric IDs
+          // Handle non-numeric IDs
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());  // Handle any other exceptions
         }
@@ -148,14 +144,10 @@ public class Console {
      * Prints all friendships for each user.
      */
     void printFriendships() {
-        System.out.println("\t\t\tFRIENDSHIPS\t\t\t");
-        for (User u : service.getUsers()) {
-            System.out.println("Friends of user: " + u.getFirstName() + " " + u.getLastName() + " ( Number of friends: " + u.getFriends().size() + " )");
-            if (u.getFriends() != null) {
-                for (User f : u.getFriends()) {
-                    System.out.println("( ID: " + f.getId() + " ) " + f.getFirstName() + " " + f.getLastName()); // Print each friend's details
-                }
-            }
+
+        Iterable<Friendship> f = service.getFriendships();
+        for (Friendship friendship : f) {
+            System.out.println(friendship);
         }
     }
 

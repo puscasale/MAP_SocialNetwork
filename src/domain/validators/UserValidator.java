@@ -32,16 +32,7 @@ public class UserValidator implements Validator<User> {
             err.append("Last name is required\n");
         }
 
-        //Check if the id is empty and a number
-        if(entity.getId() == null) {
-            err.append("ID is required\n");
-        } else {
-            try{
-                Long.parseLong(String.valueOf(entity.getId()));
-            } catch (NumberFormatException e) {
-                err.append("ID is not a number\n");
-            }
-        }
+
         if (!err.isEmpty()) {
             throw new ValidationException(err.toString());
         }

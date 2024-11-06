@@ -73,4 +73,12 @@ public class Friendship extends Entity<Tuple<Long, Long>> {
         return Objects.hash(getId()); // Generates hash based on the ID of the friendship
     }
 
+    @Override
+    public String toString() {
+        return "Friendship " +
+                "userId1: " + idUser1 +
+                ", userId2: " + idUser2;
+    }
+
+
 }

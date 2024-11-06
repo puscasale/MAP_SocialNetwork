@@ -95,9 +95,9 @@ public class User extends Entity<Long> {
                         .append(", ");
             }
         }
-        return "User" +
-                "firstName: " + firstName + '\'' +
-                ", lastName: " + lastName + '\'' + ", friends: " + friendsList;
+        return "User " + " id: " + this.getId()+
+                " firstName: " + firstName + '\'' +
+                " lastName: " + lastName + '\'';
     }
 
     /**

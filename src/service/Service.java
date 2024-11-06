@@ -28,7 +28,7 @@ public class Service {
     public Service(Repository<Long, User> userRepo, Repository<Tuple<Long, Long>, Friendship> friendshipRepo) {
         this.userRepo = userRepo;
         this.friendshipRepo = friendshipRepo;
-        this.populate(); // Populate users' friends from existing friendships
+        //this.populate(); // Populate users' friends from existing friendships
         buildAdjacencyList(); // Build the adjacency list for friendship connections
     }
 
@@ -145,6 +145,7 @@ public class Service {
      * Populates users' friend lists based on existing friendships.
      */
     public void populate() {
+        //TODO
         for (Friendship f : friendshipRepo.findAll()) {
             Long userId1 = f.getIdUser1(); // Get the first user ID
             Long userId2 = f.getIdUser2(); // Get the second user ID
@@ -159,6 +160,8 @@ public class Service {
             }
         }
     }
+
+
 
     /**
      * Counts the number of connected components (communities) in the friendship graph.
