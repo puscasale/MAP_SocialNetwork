@@ -24,8 +24,8 @@ public class UserRepository extends AbstractFileRepository<Long, User> {
      */
     @Override
     public User createEntity(String line) {
-        String[] split = line.split(";"); // Split the line by semicolon
-        User user = new User(split[1], split[2]); // Create User with first and last name
+        String[] split = line.split(";");// Split the line by semicolon
+        User user = new User(split[1], split[2], split[3], split[4]); // Create User with first and last name
         user.setId(Long.parseLong(split[0])); // Set the ID of the User
         return user; // Return the created User
     }

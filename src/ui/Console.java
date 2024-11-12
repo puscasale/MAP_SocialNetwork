@@ -3,6 +3,7 @@ package ui;
 import domain.Friendship;
 import domain.User;
 import domain.validators.ValidationException;
+import javafx.fxml.FXML;
 import service.Service;
 
 import java.util.List;
@@ -89,6 +90,7 @@ public class Console {
     /**
      * Prints all users to the console.
      */
+    @FXML
     void printUsers() {
         System.out.println("\t\t\tUSERS\t\t\t");
         Iterable<User> users = service.getUsers(); // Retrieve all users
@@ -106,15 +108,19 @@ public class Console {
         System.out.println("First name: ");
         String firstName = scan.nextLine(); // Read first name
         System.out.println("Last name: ");
-        String lastName = scan.nextLine(); // Read last name
+        String lastName = scan.nextLine();// Read last name
+        System.out.println("Email: ");
+        String email = scan.nextLine();
+        System.out.println("Password: ");
+        String password = scan.nextLine();
 
         try {
-            User user = new User(firstName, lastName); // Create a new User
+            User user = new User(firstName, lastName,email,password); // Create a new User
             service.addUser(user); // Add the user via the service
             System.out.println("User added successfully!"); // Success message
         } catch (ValidationException e) {
             System.out.println("Invalid user: " + e.getMessage()); // Error message
-          // Handle non-numeric IDs
+            // Handle non-numeric IDs
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());  // Handle any other exceptions
         }
@@ -143,6 +149,7 @@ public class Console {
     /**
      * Prints all friendships for each user.
      */
+    @FXML
     void printFriendships() {
 
         Iterable<Friendship> f = service.getFriendships();
@@ -200,6 +207,7 @@ public class Console {
     /**
      * Prints the number of communities in the user network.
      */
+    @FXML
     void printNumberOfCommunities() {
         int numCommunities = service.getNumberOfCommunities(); // Get the number of communities
         System.out.println("Number of communities: " + numCommunities); // Print the result
@@ -208,6 +216,7 @@ public class Console {
     /**
      * Prints the most social community based on the longest friendship path.
      */
+    @FXML
     void printMostSocialCommunity() {
         List<Long> mostSocialCommunity = service.getMostSocialCommunity(); // Get the most social community
         System.out.println("Most social community: " + mostSocialCommunity); // Print the result

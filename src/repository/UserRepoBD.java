@@ -4,15 +4,14 @@ import domain.User;
 import domain.validators.Validator;
 
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class UserRepoBD implements Repository<Long, User> {
     private String url;
     private String username;
     private String password;
     private Validator<User> validator;
+    Map<Long, User> users = new HashMap<>();
 
     /**
      * Constructor for initializing the repository with database connection details and a user validator.
@@ -26,6 +25,7 @@ public class UserRepoBD implements Repository<Long, User> {
         this.username = username;
         this.password = password;
         this.validator = validator;
+        loadData();
     }
 
     /**
@@ -45,7 +45,9 @@ public class UserRepoBD implements Repository<Long, User> {
             if (resultSet.next()) {
                 String firstName = resultSet.getString("firstname");
                 String lastName = resultSet.getString("lastname");
-                user = new User(firstName, lastName);
+                String email = resultSet.getString("email");
+                String password = resultSet.getString("pasword");
+                user = new User(firstName, lastName, email, password);
                 user.setId(id);
             }
         } catch (SQLException e) {
@@ -70,8 +72,9 @@ public class UserRepoBD implements Repository<Long, User> {
                 Long id = resultSet.getLong("user_id");
                 String firstName = resultSet.getString("firstname");
                 String lastName = resultSet.getString("lastname");
-
-                User u = new User(firstName, lastName);
+                String email = resultSet.getString("email");
+                String password = resultSet.getString("pasword");
+                User u = new User(firstName, lastName, email, password);
                 u.setId(id);
                 users.add(u);
             }
@@ -100,7 +103,12 @@ public class UserRepoBD implements Repository<Long, User> {
             e.printStackTrace();
         }
 
-        return rez > 0 ? Optional.of(entity) : Optional.empty();
+       if( rez > 0){
+           users.put(entity.getId(), entity);
+           loadData();
+           return Optional.empty();
+       }
+       else return Optional.of(entity);
     }
 
     /**
@@ -113,6 +121,8 @@ public class UserRepoBD implements Repository<Long, User> {
     @Override
     public Optional<User> update(User entity) {
         int rowsAffected = -1;
+        validator.validate(entity);
+        Optional<User> existingUser = Optional.ofNullable(users.get(entity.getId()));
         try (Connection connection = DriverManager.getConnection(url, username, password);
              PreparedStatement statement = connection.prepareStatement("UPDATE users SET firstname = ?, lastname = ? WHERE user_id = ?")) {
             statement.setString(1, entity.getFirstName());
@@ -124,7 +134,12 @@ public class UserRepoBD implements Repository<Long, User> {
             e.printStackTrace();
         }
 
-        return rowsAffected > 0 ? Optional.empty() : Optional.of(entity);
+        if( rowsAffected > 0){
+            users.put(entity.getId(), entity);
+            loadData();
+            return Optional.empty();
+        }
+        else return Optional.of(entity);
     }
 
     /**
@@ -136,7 +151,7 @@ public class UserRepoBD implements Repository<Long, User> {
      */
     @Override
     public Optional<User> delete(Long id) {
-        Optional<User> userToDelete = findOne(id);
+        Optional<User> userToDelete = Optional.ofNullable(users.get(id));
         int rowsAffected = -1;
 
         if (userToDelete.isPresent()) {
@@ -149,7 +164,20 @@ public class UserRepoBD implements Repository<Long, User> {
             }
         }
 
-        return rowsAffected > 0 ? userToDelete : Optional.empty();
+        if( rowsAffected > 0){
+            users.remove(id);
+            loadData();
+            return Optional.empty();
+
+        }
+        else return Optional.of(userToDelete.get());
     }
+
+    private void loadData(){
+        findAll().forEach(user -> {
+            users.put(user.getId(), user);
+        });
+    }
+
 
 }

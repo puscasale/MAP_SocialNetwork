@@ -17,9 +17,10 @@ public class Friendship extends Entity<Tuple<Long, Long>> {
      * @param idUser1 the ID of the first user in the friendship
      * @param idUser2 the ID of the second user in the friendship
      */
-    public Friendship(Long idUser1, Long idUser2) {
+    public Friendship(Long idUser1, Long idUser2, LocalDateTime date) {
         this.idUser1 = idUser1;
         this.idUser2 = idUser2;
+        this.date = date;
     }
 
     /**
@@ -77,7 +78,7 @@ public class Friendship extends Entity<Tuple<Long, Long>> {
     public String toString() {
         return "Friendship " +
                 "userId1: " + idUser1 +
-                ", userId2: " + idUser2;
+                ", userId2: " + idUser2 + "date: " + date.toLocalDate();
     }
 
 

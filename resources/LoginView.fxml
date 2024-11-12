@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<VBox alignment="CENTER" spacing="20" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.LoginController" style="-fx-background-color: linear-gradient(to bottom right, blue, purple); -fx-padding: 20px;">
+    <padding>
+        <Insets bottom="10" left="10" right="10" top="10" />
+    </padding>
+
+    <!-- Title Label -->
+    <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;" text="Login" />
+
+    <!-- Email Field -->
+    <TextField fx:id="emailField" promptText="Email" style="-fx-background-color: #f0f8ff; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-padding: 10px;" />
+
+    <!-- Password Field -->
+    <PasswordField fx:id="passwordField" promptText="Password" style="-fx-background-color: #f0f8ff; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-padding: 10px;" />
+
+    <!-- Login Button -->
+    <Button onAction="#handleLogin" text="Login" style="-fx-background-color: #4c6ef5; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10px 20px; -fx-border-radius: 5px; -fx-background-radius: 5px;" />
+</VBox>

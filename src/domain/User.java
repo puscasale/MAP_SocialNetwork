@@ -11,6 +11,8 @@ import java.util.Objects;
 public class User extends Entity<Long> {
     private String firstName;
     private String lastName;
+    private String email;
+    private String password;
     private List<User> friends;
 
     /**
@@ -19,9 +21,11 @@ public class User extends Entity<Long> {
      * @param firstName the first name of the user
      * @param lastName the last name of the user
      */
-    public User(String firstName, String lastName) {
+    public User(String firstName, String lastName, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.email = email;
+        this.password = password;
         this.friends = new ArrayList<>();
     }
 
@@ -31,6 +35,13 @@ public class User extends Entity<Long> {
      */
     public String getFirstName() {
         return this.firstName;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+    public String getPassword() {
+        return this.password;
     }
 
     /**
@@ -97,7 +108,7 @@ public class User extends Entity<Long> {
         }
         return "User " + " id: " + this.getId()+
                 " firstName: " + firstName + '\'' +
-                " lastName: " + lastName + '\'';
+                " lastName: " + lastName + '\'' + "email: " + email + '\'';
     }
 
     /**

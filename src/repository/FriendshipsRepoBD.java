@@ -5,6 +5,7 @@ import domain.Tuple;
 import domain.User;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -48,7 +49,8 @@ public class FriendshipsRepoBD implements Repository<Tuple<Long, Long>, Friendsh
             if (resultSet.next()) {
                 Long user1 = resultSet.getLong("user_id_1");
                 Long user2 = resultSet.getLong("user_id_2");
-                friendship = new Friendship(user1, user2);
+                LocalDateTime date = resultSet.getTimestamp("date").toLocalDateTime();
+                friendship = new Friendship(user1, user2, date);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -70,7 +72,8 @@ public class FriendshipsRepoBD implements Repository<Tuple<Long, Long>, Friendsh
             while (resultSet.next()) {
                 Long user1 = resultSet.getLong("user_id_1");
                 Long user2 = resultSet.getLong("user_id_2");
-                Friendship friendship = new Friendship(user1, user2);
+                LocalDateTime date = resultSet.getTimestamp("date").toLocalDateTime();
+                Friendship friendship = new Friendship(user1, user2, date);
                 friendships.add(friendship);
                 friendship.setId(new Tuple<>(user1, user2));
 

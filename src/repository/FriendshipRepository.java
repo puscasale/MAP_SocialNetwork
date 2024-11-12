@@ -4,6 +4,8 @@ import domain.Friendship;
 import domain.Tuple;
 import domain.validators.Validator;
 
+import java.time.LocalDateTime;
+
 /**
  * Repository for managing Friendship entities, extending the AbstractFileRepository.
  * Provides methods for creating and saving Friendship entities from/to a file.
@@ -26,8 +28,9 @@ public class FriendshipRepository extends AbstractFileRepository<Tuple<Long, Lon
     @Override
     public Friendship createEntity(String line) {
         Long id1 = Long.parseLong(line.split(" ")[0]); // Parse the first user ID from the string
-        Long id2 = Long.parseLong(line.split(" ")[1]); // Parse the second user ID from the string
-        Friendship friendship = new Friendship(id1, id2); // Create Friendship with both user IDs
+        Long id2 = Long.parseLong(line.split(" ")[1]);// Parse the second user ID from the string
+        LocalDateTime date = LocalDateTime.parse(line.split(" ")[2]);
+        Friendship friendship = new Friendship(id1, id2, date); // Create Friendship with both user IDs
         friendship.setId(new Tuple<>(id1, id2)); // Set the composite ID using a Tuple
         return friendship; // Return the created Friendship
     }

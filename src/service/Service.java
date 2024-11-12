@@ -7,6 +7,7 @@ import domain.validators.FriendshipValidator;
 import domain.validators.UserValidator;
 import repository.Repository;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -107,7 +108,7 @@ public class Service {
             user1.addFriend(user2);
             user2.addFriend(user1);
 
-            Friendship f = new Friendship(userId1, userId2);
+            Friendship f = new Friendship(userId1, userId2, LocalDateTime.now());
             f.setId(new Tuple<>(userId1, userId2));
 
             friendshipRepo.save(f);
@@ -254,5 +255,62 @@ public class Service {
         }
         Collections.reverse(path); // Reverse the path to get from start to end
         return path; // Return the reconstructed path
+    }
+
+    /**
+     * Validates login credentials.
+     * @param email the user's email
+     * @param password the user's password
+     * @return the User object if credentials are valid, null otherwise
+     */
+    public User login(String email, String password) {
+        for (User user : userRepo.findAll()) {
+            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
+                return user; // Return user if email and password match
+            }
+        }
+        return null; // Return null if no matching user is found
+    }
+
+    /**
+     * Retrieves the list of friends for a given user.
+     * A user can be added as a friend by checking all friendships and matching user IDs.
+     * @param user the user whose friends are to be retrieved
+     * @return a list of friends of the given user
+     */
+    public List<User> getFriends(User user){
+
+        List<User> friends = new ArrayList<>();
+
+        for (Friendship f : friendshipRepo.findAll()) {
+            if(f.getIdUser1().equals(user.getId())){ // adauga de doua ori
+                friends.add(userRepo.findOne(f.getIdUser2()).get());
+                User utilizator = userRepo.findOne(f.getIdUser1()).get();
+                userRepo.findOne(f.getIdUser2()).get().addFriend(utilizator);
+
+            }
+            else if(f.getIdUser2().equals(user.getId())){
+                friends.add(userRepo.findOne(f.getIdUser1()).get());
+                User utilizator = userRepo.findOne(f.getIdUser2()).get();
+                userRepo.findOne(f.getIdUser1()).get().addFriend(utilizator);
+            }
+        }
+        return friends;
+
+    }
+
+    /**
+     * Searches for a user by their first and last name.
+     * @param firstName the user's first name
+     * @param lastName the user's last name
+     * @return the User object if found, null otherwise
+     */
+    public User findUserByName(String firstName, String lastName) {
+        for(User u : userRepo.findAll()){
+            if(u.getFirstName().equals(firstName) && u.getLastName().equals(lastName)){
+                return u;
+            }
+        }
+        return null;
     }
 }
