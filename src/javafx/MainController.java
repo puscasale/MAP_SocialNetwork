@@ -6,10 +6,13 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import service.Service;
 
 import java.io.IOException;
@@ -28,6 +31,9 @@ public class MainController {
 
     @FXML
     private TextField last_name;
+
+    @FXML
+    private Label messageLabel;
 
 
     public void setService(Service service) {
@@ -50,7 +56,6 @@ public class MainController {
         try {
 
             List<User> friendships = service.getFriends(loggedInUser);
-            System.out.println(friendships);
 
             ObservableList<String> friendsNames = FXCollections.observableArrayList();
 
@@ -77,7 +82,7 @@ public class MainController {
     /**
      * Adds a new friend to the logged-in user's friend list.
      * It uses the first and last name entered in the text fields to find the user and add them.
-     */
+
     @FXML
     private void addFriend() {
         String ln = last_name.getText();
@@ -104,7 +109,7 @@ public class MainController {
             e.printStackTrace();
         }
     }
-
+     */
     /**
      * Removes a selected friend from the logged-in user's friend list.
      * It looks for the selected friend by their name and removes them.
@@ -150,6 +155,31 @@ public class MainController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    public void onFriendRequestButton(){
+        openMainScene();
+    }
+
+    private void openMainScene() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/RequestsView.fxml"));
+            Parent root = loader.load();  // Încarcă FXML-ul pentru noua scenă
+
+            Stage stage = (Stage) friendsListView.getScene().getWindow();  // Folosește orice element valid din scenă curentă
+            stage.setTitle("Friend Requests");
+            stage.setScene(new Scene(root));
+
+            // Setează controller-ul pentru RequestsView
+            RequestsController requestsController = loader.getController();
+            requestsController.setService(service);
+            requestsController.setUser(loggedInUser);
+
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * Loads the main view (FXML file) of the application.

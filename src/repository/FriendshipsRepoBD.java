@@ -2,7 +2,7 @@ package repository;
 
 import domain.Friendship;
 import domain.Tuple;
-import domain.User;
+import enums.Friendshiprequest;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -11,9 +11,9 @@ import java.util.Optional;
 import java.util.Set;
 
 public class FriendshipsRepoBD implements Repository<Tuple<Long, Long>, Friendship> {
-    private String url;
-    private String username;
-    private String password;
+    private static String url;
+    private static String username;
+    private static String password;
 
     /**
      * Constructor for initializing the Friendships repository with database connection details.
@@ -50,7 +50,8 @@ public class FriendshipsRepoBD implements Repository<Tuple<Long, Long>, Friendsh
                 Long user1 = resultSet.getLong("user_id_1");
                 Long user2 = resultSet.getLong("user_id_2");
                 LocalDateTime date = resultSet.getTimestamp("date").toLocalDateTime();
-                friendship = new Friendship(user1, user2, date);
+                Friendshiprequest friendshiprequest = Friendshiprequest.valueOf(resultSet.getString("request"));
+                friendship = new Friendship(user1, user2, date,friendshiprequest);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -73,7 +74,8 @@ public class FriendshipsRepoBD implements Repository<Tuple<Long, Long>, Friendsh
                 Long user1 = resultSet.getLong("user_id_1");
                 Long user2 = resultSet.getLong("user_id_2");
                 LocalDateTime date = resultSet.getTimestamp("date").toLocalDateTime();
-                Friendship friendship = new Friendship(user1, user2, date);
+                Friendshiprequest friendshiprequest = Friendshiprequest.valueOf(resultSet.getString("request"));
+                Friendship friendship = new Friendship(user1, user2, date,friendshiprequest);
                 friendships.add(friendship);
                 friendship.setId(new Tuple<>(user1, user2));
 
@@ -93,10 +95,12 @@ public class FriendshipsRepoBD implements Repository<Tuple<Long, Long>, Friendsh
     public Optional<Friendship> save(Friendship friendship) {
         int rowsAffected = -1;
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("INSERT INTO friendships (user_id_1, user_id_2) VALUES (?, ?)")) {
+             PreparedStatement statement = connection.prepareStatement("INSERT INTO friendships (user_id_1, user_id_2,date, request) VALUES (?, ?, ?, ?)")) {
 
             statement.setLong(1, friendship.getIdUser1());
             statement.setLong(2, friendship.getIdUser2());
+            statement.setTimestamp(3, Timestamp.valueOf(friendship.getDate()));
+            statement.setString(4, friendship.getFriendshiprequest().toString());
             rowsAffected = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -112,9 +116,26 @@ public class FriendshipsRepoBD implements Repository<Tuple<Long, Long>, Friendsh
      */
     @Override
     public Optional<Friendship> update(Friendship friendship) {
-        // Friendships typically are not updated, so we return an empty Optional.
-        return Optional.empty();
+        int rez = -1;
+        try (Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement statement = connection.prepareStatement("UPDATE friendships SET  date = ?, request= ? WHERE user_id_1 = ? and user_id_2 = ?")) {
+            statement.setTimestamp(1, Timestamp.valueOf(friendship.getDate()));
+            statement.setString(2,friendship.getFriendshiprequest().toString());
+            statement.setLong(3,friendship.getIdUser1());
+            statement.setLong(4,friendship.getIdUser2());
+            rez = statement.executeUpdate();
+        } catch (SQLException e) {
+        e.printStackTrace();
+
+            if (rez > 0) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.of(friendship);
     }
+
+
 
     /**
      * Deletes a friendship between two users.

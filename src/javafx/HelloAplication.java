@@ -13,7 +13,6 @@ import repository.FriendshipsRepoBD;
 import repository.Repository;
 import repository.UserRepoBD;
 import service.Service;
-import javafx.LoginController;
 
 public class HelloAplication extends Application {
 

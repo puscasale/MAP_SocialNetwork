@@ -5,7 +5,9 @@ import domain.Tuple;
 import domain.User;
 import domain.validators.FriendshipValidator;
 import domain.validators.UserValidator;
+import enums.Friendshiprequest;
 import repository.Repository;
+import repository.UserRepoBD;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -283,13 +285,13 @@ public class Service {
         List<User> friends = new ArrayList<>();
 
         for (Friendship f : friendshipRepo.findAll()) {
-            if(f.getIdUser1().equals(user.getId())){ // adauga de doua ori
+            if(f.getIdUser1().equals(user.getId()) && f.getFriendshiprequest().name().equals("APROOVED")){ // adauga de doua or
                 friends.add(userRepo.findOne(f.getIdUser2()).get());
                 User utilizator = userRepo.findOne(f.getIdUser1()).get();
                 userRepo.findOne(f.getIdUser2()).get().addFriend(utilizator);
 
             }
-            else if(f.getIdUser2().equals(user.getId())){
+            else if(f.getIdUser2().equals(user.getId()) && f.getFriendshiprequest().name().equals("APROOVED")){
                 friends.add(userRepo.findOne(f.getIdUser1()).get());
                 User utilizator = userRepo.findOne(f.getIdUser2()).get();
                 userRepo.findOne(f.getIdUser1()).get().addFriend(utilizator);
@@ -313,4 +315,31 @@ public class Service {
         }
         return null;
     }
+
+    public Optional<User> find_user(Long idUser) {
+        return userRepo.findOne(idUser);
+    }
+
+
+    public void manageFriendRequest(Friendship friendship, Friendshiprequest friendshipRequest) {
+        try {
+            if (!friendshipRepo.findOne(friendship.getId()).isPresent()) {
+                throw new Exception("Friendship doesn't exist!");
+            } else if (friendship.getFriendshiprequest() != Friendshiprequest.PENDING) {
+                throw new Exception("Friendship is not PENDING!");
+            }
+            friendship.setFriendshiprequest(friendshipRequest);
+            friendshipRepo.update(friendship);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void createFriendshipRequest(Long id1, Long id2) {
+        Friendship friendship = new Friendship(id1, id2, LocalDateTime.now());
+        addFriendship(id1, id2);
+    }
+
+
+
 }

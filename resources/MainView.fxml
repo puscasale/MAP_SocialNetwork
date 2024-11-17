@@ -2,30 +2,30 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="javafx.MainController" style="-fx-background-color: #F4F4F9;">
+<AnchorPane prefHeight="514.0" prefWidth="596.0" style="-fx-background-color: #F4F4F9;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.MainController">
     <children>
         <!-- Titlu pentru fereastra -->
-        <Text text="Lista Prietenilor" layoutX="100.0" layoutY="20.0" fill="#4B0082"/>
-
+        <Text fill="#4B0082" layoutX="100.0" layoutY="50.0" text="Lista Prietenilor" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
 
         <!-- ListView pentru afișarea prietenilor -->
         <ListView fx:id="friendsListView" layoutX="50.0" layoutY="100.0" prefHeight="300.0" prefWidth="350.0"
-                  style="-fx-background-color: #D8B4F7; -fx-border-color: #4B0082; -fx-border-width: 2px; -fx-font-size: 14px;"/>
+                  style="-fx-background-color: #D8B4F7; -fx-border-color: #4B0082; -fx-border-width: 2px; -fx-font-size: 14px;" />
 
         <!-- Câmp pentru primul nume al prietenului -->
-        <TextField fx:id="fisrt_name" layoutX="50.0" layoutY="420.0" prefWidth="150.0" promptText="First Name"/>
+        <TextField fx:id="fisrt_name" layoutX="50.0" layoutY="420.0" prefWidth="150.0" promptText="First Name" />
 
         <!-- Câmp pentru al doilea nume al prietenului -->
-        <TextField fx:id="last_name" layoutX="210.0" layoutY="420.0" prefWidth="150.0" promptText="Last Name"/>
+        <TextField fx:id="last_name" layoutX="210.0" layoutY="420.0" prefWidth="150.0" promptText="Last Name" />
 
-        <!-- Buton pentru adăugarea unui prieten -->
-        <Button text="Add Friend" layoutX="50.0" layoutY="460.0" onAction="#addFriend" style="-fx-background-color: #4B0082; -fx-text-fill: white;"/>
+
 
         <!-- Buton pentru ștergerea unui prieten -->
-        <Button text="Remove Friend" layoutX="210.0" layoutY="460.0" onAction="#removeFriend" style="-fx-background-color: #4B0082; -fx-text-fill: white;"/>
+        <Button layoutX="210.0" layoutY="460.0" onAction="#removeFriend" style="-fx-background-color: #4B0082; -fx-text-fill: white;" text="Remove Friend" />
+
+        <!-- Buton pentru navigarea la pagina de cereri -->
+        <Button layoutX="400.0" layoutY="420.0" prefWidth="130.0"
+                onAction="#onFriendRequestButton" style="-fx-background-color: #6A1B9A; -fx-text-fill: white;" text="View Requests" />
     </children>
 </AnchorPane>
