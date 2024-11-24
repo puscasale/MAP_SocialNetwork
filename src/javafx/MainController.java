@@ -3,15 +3,13 @@ package javafx;
 import domain.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import service.Service;
 
@@ -23,17 +21,21 @@ public class MainController {
     private Service service;
     private User loggedInUser;
 
-    @FXML
-    private ListView<String> friendsListView;
+
 
     @FXML
-    private TextField fisrt_name;
+    private TextField text_field;
 
     @FXML
-    private TextField last_name;
+    private Label first_name;
 
     @FXML
-    private Label messageLabel;
+    private Label last_name;
+
+    @FXML
+    private Label email;
+
+
 
 
     public void setService(Service service) {
@@ -46,103 +48,19 @@ public class MainController {
      */
     public void setUser(User user) {
         this.loggedInUser = user;
-        loadFriendsList();
+        initialize();
+
     }
 
-    /**
-     * Loads the list of friends for the logged-in user into the ListView.
-     */
-    private void loadFriendsList() {
-        try {
-
-            List<User> friendships = service.getFriends(loggedInUser);
-
-            ObservableList<String> friendsNames = FXCollections.observableArrayList();
-
-            if (friendships.isEmpty() || friendships == null) {
-                showAlert("You have no friends yet!");
-            } else {
-
-                for (User friend : friendships) {
-                    String fullName = friend.getFirstName() + " " + friend.getLastName();
-                    friendsNames.add(fullName);
-                }
-
-            }
-
-
-            friendsListView.setItems(friendsNames);
-        } catch (Exception e) {
-            showAlert("An error occurred while loading your friends list.");
-            e.printStackTrace();
+    public void initialize() {
+        // Presupunem că loggedInUser este deja setat, de exemplu, printr-o sesiune sau după logare
+        if (loggedInUser != null) {
+            // Setează valorile în câmpurile de text
+            first_name.setText(loggedInUser.getFirstName());
+            last_name.setText(loggedInUser.getLastName());
+            email.setText(loggedInUser.getEmail());
         }
     }
-
-
-    /**
-     * Adds a new friend to the logged-in user's friend list.
-     * It uses the first and last name entered in the text fields to find the user and add them.
-
-    @FXML
-    private void addFriend() {
-        String ln = last_name.getText();
-        String fn = fisrt_name.getText();
-        if (ln == null || ln.isEmpty() || fn == null || fn.isEmpty()) {
-            showAlert("Please enter a friend's name.");
-            return;
-        }
-
-        try {
-
-            User friend = service.findUserByName(fn,ln);
-
-            if (friend == null) {
-                showAlert("Friend not found.");
-            } else {
-
-                service.addFriendship(loggedInUser.getId(), friend.getId());
-                showAlert("Friend added successfully!");
-                loadFriendsList();
-            }
-        } catch (Exception e) {
-            showAlert("An error occurred while adding the friend.");
-            e.printStackTrace();
-        }
-    }
-     */
-    /**
-     * Removes a selected friend from the logged-in user's friend list.
-     * It looks for the selected friend by their name and removes them.
-     */
-    @FXML
-    private void removeFriend() {
-        String selectedFriend = friendsListView.getSelectionModel().getSelectedItem();
-        if (selectedFriend == null) {
-            showAlert("Please select a friend to remove.");
-            return;
-        }
-
-        try {
-
-            String[] nameParts = selectedFriend.split(" ");
-            String firstName = nameParts[0];
-            String lastName = nameParts[1];
-
-            User friend = service.findUserByName(firstName,lastName);
-
-            if (friend != null) {
-                service.removeFriendship(loggedInUser.getId(), friend.getId());
-                showAlert("Friend removed successfully!");
-                loadFriendsList();
-            } else {
-                showAlert("Friend not found.");
-            }
-        } catch (Exception e) {
-            showAlert("An error occurred while removing the friend.");
-            e.printStackTrace();
-        }
-    }
-
 
     /**
      * Shows an informational alert with the given message.
@@ -165,9 +83,9 @@ public class MainController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/RequestsView.fxml"));
             Parent root = loader.load();  // Încarcă FXML-ul pentru noua scenă
 
-            Stage stage = (Stage) friendsListView.getScene().getWindow();  // Folosește orice element valid din scenă curentă
+            Stage stage = (Stage) text_field.getScene().getWindow();  // Folosește orice element valid din scenă curentă
             stage.setTitle("Friend Requests");
-            stage.setScene(new Scene(root));
+            stage.setScene(new Scene(root,800,600));
 
             // Setează controller-ul pentru RequestsView
             RequestsController requestsController = loader.getController();
@@ -192,6 +110,259 @@ public class MainController {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+/*
+    @FXML
+    private void onMessagesButtonClicked() {
+
+        String firstName = text_field.getText();
+        String lastName = last_name.getText();
+
+        if (firstName == null || firstName.isEmpty() || lastName == null || lastName.isEmpty()) {
+            showAlert("Please enter both first name and last name to open chat.");
+            return;
+        }
+
+        try {
+            User friend = service.findUserByName(firstName, lastName);
+            if (friend == null) {
+                showAlert("Friend not found.");
+            } else {
+                // Navigare către pagina de mesaje
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/MessageView.fxml"));
+                Parent root = loader.load();
+
+                MessageController messageController = loader.getController();
+                messageController.setService(service);
+                messageController.setUser(loggedInUser);
+                messageController.setFriend(friend);
+
+                Stage stage = (Stage) text_field.getScene().getWindow();
+                stage.setTitle("Messages with " + friend.getFirstName());
+                stage.setScene(new Scene(root,800,600));
+                stage.show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("An error occurred while opening the chat.");
+        }
+    }
+
+
+ */
+    @FXML
+    private void onBackButtonClicked() {
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginView.fxml"));
+            Parent root = loader.load();  // Încarcă FXML-ul pentru pagina principală
+
+            // Folosește un element existent din scena curentă pentru a obține Stage (de exemplu, requestsList)
+            Stage stage = (Stage) text_field.getScene().getWindow();
+            stage.setTitle("Social Network");
+            stage.setScene(new Scene(root,800,600));
+
+            // Setează controller-ul pentru MainView
+            LoginController mainController = loader.getController();
+            mainController.setService(service);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+    public void onFriendsButtonClicked(ActionEvent actionEvent) {
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/FriendsView.fxml"));
+            Parent root = loader.load();
+
+
+            Stage stage = (Stage) text_field.getScene().getWindow();
+            stage.setTitle("Social Network");
+            stage.setScene(new Scene(root,800,600));
+
+
+            FriendsController mainController = loader.getController();
+            mainController.setService(service);
+            mainController.setUser(loggedInUser);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void handleChangeFirstName(ActionEvent actionEvent) {
+        String newFirstName = text_field.getText();
+
+        if (newFirstName != null && !newFirstName.isEmpty()) {
+            // Get the current user details
+            String lastName = loggedInUser.getLastName();
+            String email = loggedInUser.getEmail();
+            String password = loggedInUser.getPassword();
+            Long id = loggedInUser.getId();
+
+            // Create a new User object with the updated first name
+            User u = new User(newFirstName, lastName, email, password);
+            u.setId(id);
+
+            // Update the user in the database or system
+            service.update_user(u);
+
+            // Update the loggedInUser object to reflect the change
+            //loggedInUser.setFirstName(newFirstName);
+
+            // Optionally, update the UI with the new first name
+            first_name.setText(newFirstName);
+
+            // Clear the text field
+            text_field.clear();
+        } else {
+            // Handle empty first name case (optional)
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("First name cannot be empty");
+            alert.showAndWait();
+        }
+    }
+
+    public void handleChangeLastName(ActionEvent actionEvent) {
+        String newLastName = text_field.getText();
+
+        if (newLastName != null && !newLastName.isEmpty()) {
+            // Get the current user details
+            String firstName = loggedInUser.getFirstName();
+            String email = loggedInUser.getEmail();
+            String password = loggedInUser.getPassword();
+            Long id = loggedInUser.getId();
+
+            // Create a new User object with the updated first name
+            User u = new User(firstName, newLastName, email, password);
+            u.setId(id);
+
+            // Update the user in the database or system
+            service.update_user(u);
+
+            // Update the loggedInUser object to reflect the change
+            //loggedInUser.setFirstName(newFirstName);
+
+            // Optionally, update the UI with the new first name
+            last_name.setText(newLastName);
+
+            // Clear the text field
+            text_field.clear();
+        } else {
+            // Handle empty first name case (optional)
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Last name cannot be empty");
+            alert.showAndWait();
+        }
+    }
+
+
+    public void handleChangeEmail(ActionEvent actionEvent) {
+        String newemail = text_field.getText();
+
+        if (newemail != null && !newemail.isEmpty()) {
+            // Get the current user details
+            String lastName = loggedInUser.getLastName();
+            String firstName = loggedInUser.getFirstName();
+            String password = loggedInUser.getPassword();
+            Long id = loggedInUser.getId();
+
+            // Create a new User object with the updated first name
+            User u = new User(firstName, lastName,newemail, password);
+            u.setId(id);
+
+            // Update the user in the database or system
+            service.update_user(u);
+
+            // Update the loggedInUser object to reflect the change
+            //loggedInUser.setFirstName(newFirstName);
+
+            // Optionally, update the UI with the new first name
+            email.setText(newemail);
+
+            // Clear the text field
+            text_field.clear();
+        } else {
+            // Handle empty first name case (optional)
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Email cannot be empty");
+            alert.showAndWait();
+        }
+    }
+
+    public void handleChangePassword(ActionEvent actionEvent) {
+        String newpassword = text_field.getText();
+
+        if (newpassword != null && !newpassword.isEmpty()) {
+            // Get the current user details
+            String firstName = loggedInUser.getFirstName();
+            String lastName = loggedInUser.getLastName();
+            String email = loggedInUser.getEmail();
+            Long id = loggedInUser.getId();
+
+            // Create a new User object with the updated first name
+            User u = new User(firstName, lastName, email, newpassword);
+            u.setId(id);
+
+            // Update the user in the database or system
+            service.update_user(u);
+
+            // Clear the text field
+            text_field.clear();
+        } else {
+            // Handle empty first name case (optional)
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Password name cannot be empty");
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
+    private void handleDeleteAccount() {
+        // Show a confirmation message
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Account Deletion");
+        alert.setHeaderText("Are you sure you want to delete your account?");
+        alert.setContentText("This action cannot be undone.");
+
+        // Check the user's response
+        if (alert.showAndWait().get() == ButtonType.OK) {
+            // Here you add the logic to delete the profile from the application
+            service.removeUser(loggedInUser.getId());
+
+            onBackButtonClicked();
+        }
+    }
+
+    public void onChatButtonClicked(ActionEvent actionEvent) {
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ChatView.fxml"));
+            Parent root = loader.load();
+
+
+            Stage stage = (Stage) text_field.getScene().getWindow();
+            stage.setTitle("Social Network");
+            stage.setScene(new Scene(root,800,600));
+
+
+            ChatController mainController = loader.getController();
+            mainController.setService(service);
+            mainController.setUser(loggedInUser);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

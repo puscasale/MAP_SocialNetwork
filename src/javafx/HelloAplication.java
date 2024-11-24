@@ -1,6 +1,7 @@
 package javafx;
 
 import domain.Friendship;
+import domain.Message;
 import domain.Tuple;
 import domain.User;
 import domain.validators.UserValidator;
@@ -10,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import repository.FriendshipsRepoBD;
+import repository.MessageRepoBD;
 import repository.Repository;
 import repository.UserRepoBD;
 import service.Service;
@@ -30,22 +32,25 @@ public class HelloAplication extends Application {
 
         Repository<Long, User> userRepoBD = new UserRepoBD(url, username, password, new UserValidator());
         Repository<Tuple<Long, Long>, Friendship> friendshipRepoBD = new FriendshipsRepoBD(url, username, password);
-        Service srv = new Service(userRepoBD, friendshipRepoBD);
-
+        Repository<Long, Message> messageRepoBD = new MessageRepoBD(userRepoBD,url, username, password);
+        Service srv = new Service(userRepoBD, friendshipRepoBD, messageRepoBD);
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginView.fxml"));
         Parent root = loader.load();
 
-
         LoginController loginController = loader.getController();
         loginController.setService(srv);
 
-
-        Scene scene = new Scene(root, 320, 240);
+        Scene scene = new Scene(root, 800, 600);
         primaryStage.setTitle("Social Network");
         primaryStage.setScene(scene);
+
+        // Setează fereastra pe tot ecranul
+
+
         primaryStage.show();
     }
+
 
 
     /**

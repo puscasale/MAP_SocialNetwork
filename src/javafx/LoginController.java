@@ -1,9 +1,11 @@
 package javafx;
 
 import domain.User;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
@@ -24,6 +26,9 @@ public class LoginController {
     @FXML
     private PasswordField passwordField;
 
+    @FXML
+    private Hyperlink signUpLink;
+
     public LoginController() {
     }
 
@@ -33,6 +38,7 @@ public class LoginController {
      */
     @FXML
     private void handleLogin() {
+
         String email = emailField.getText();
         String password = passwordField.getText();
 
@@ -77,7 +83,7 @@ public class LoginController {
 
             Stage stage = (Stage) emailField.getScene().getWindow();
 
-            Scene scene = new Scene(loader.load());
+            Scene scene = new Scene(loader.load(),800,600);
 
             stage.setScene(scene);
 
@@ -104,4 +110,32 @@ public class LoginController {
     public void setService(Service srv) {
         this.srv = srv;
     }
+
+    /**
+     * This method is triggered when the "Don't have an account? Sign up" link is clicked.
+     * It navigates to the Sign-Up page.
+     */
+    @FXML
+    private void handleSignUpRedirect() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SignUpView.fxml"));
+            Stage stage = (Stage) signUpLink.getScene().getWindow();
+            Scene scene = new Scene(loader.load(),800,600);
+
+            SignUpController signUpController = loader.getController();
+            signUpController.setService(srv);
+
+            stage.setScene(scene);
+            stage.setTitle("Sign Up");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleExit() {
+        Platform.exit();  // Închide aplicația
+    }
+
 }

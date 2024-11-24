@@ -1,63 +1,117 @@
 package javafx;
 
+import domain.User;
+import javafx.LoginController;
+import javafx.MainController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import service.Service;
 
 import java.io.IOException;
 
 public class SignUpController {
 
-    @FXML
-    private TextField firstNameField;
+    private Service srv;
 
     @FXML
-    private TextField lastNameField;
+    private TextField firstName;
 
     @FXML
-    private TextField emailField;
+    private TextField lastName;
 
     @FXML
-    private PasswordField passwordField;
+    private TextField email;
 
     @FXML
-    private void handleSignUp(ActionEvent event) {
-        String firstName = firstNameField.getText();
-        String lastName = lastNameField.getText();
-        String email = emailField.getText();
-        String password = passwordField.getText();
+    private PasswordField password;
 
-        // Poți adăuga logica de validare și înregistrare a utilizatorului aici
-
-        // Dacă totul este corect, redirecționează către MainController
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle("Registration Successful");
-        alert.setHeaderText("Account successfully created!");
-        alert.showAndWait();
-
-        // După crearea contului, navighează la pagina principală (MainController)
-        Stage stage = (Stage) firstNameField.getScene().getWindow();
-        MainController mainController = new MainController();
-        Scene mainScene = new Scene(mainController.getMainView());
-        stage.setScene(mainScene);
-        stage.show();
+    public void setService(Service service) {
+        this.srv = service;
     }
 
-    public Parent getSignUpView() {
+    // Handle sign-up button click
+    @FXML
+    private void handleSignUp(ActionEvent event) {
+        String fn = firstName.getText();
+        String ln = lastName.getText();
+        String emailInput = email.getText();
+        System.out.println(emailInput);
+        String pass = password.getText();
+
+        // Check if fields are empty
+        if (fn.isEmpty() || ln.isEmpty() || emailInput.isEmpty() || pass.isEmpty()) {
+            showAlert("All fields must be filled!");
+            return;
+        }
+
+        // Check if the email already exists
+        if (srv.findUserByEmail(emailInput) != null) {
+            showAlert("Email already exists!");
+            return;
+        }
+
+        // Create new user
+        User newUser = new User(fn, ln, emailInput, pass);
+        srv.addUser(newUser);
+
         try {
-            // Încarcă fișierul FXML asociat paginii de înregistrare
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SignUpView.fxml"));
-            return loader.load();
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
+            Parent root = loader.load();  // Încarcă FXML-ul pentru pagina principală
+
+            // Folosește un element existent din scena curentă pentru a obține Stage (de exemplu, requestsList)
+            Stage stage = (Stage) firstName.getScene().getWindow();  // Poți folosi requestsList sau orice alt element valid
+            stage.setTitle("Social Network");
+            stage.setScene(new Scene(root,800,600));
+
+            // Setează controller-ul pentru MainView
+            MainController mainController = loader.getController();
+            mainController.setService(srv);
+            mainController.setUser(newUser);
+
+            stage.show();
+
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
+    }
+
+    // Handle back button click
+    @FXML
+    public void onButtonBackClicked() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginView.fxml"));
+            Parent root = loader.load();  // Încarcă FXML-ul pentru pagina principală
+
+            // Folosește un element existent din scena curentă pentru a obține Stage (de exemplu, requestsList)
+            Stage stage = (Stage) lastName.getScene().getWindow();
+            stage.setTitle("Social Network");
+            stage.setScene(new Scene(root,800,600));
+
+            // Setează controller-ul pentru MainView
+            LoginController mainController = loader.getController();
+            mainController.setService(srv);
+
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Show alert with the given message
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Sign Up");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

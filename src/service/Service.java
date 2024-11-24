@@ -1,16 +1,19 @@
 package service;
 
 import domain.Friendship;
+import domain.Message;
 import domain.Tuple;
 import domain.User;
 import domain.validators.FriendshipValidator;
 import domain.validators.UserValidator;
+import domain.validators.ValidationException;
 import enums.Friendshiprequest;
 import repository.Repository;
 import repository.UserRepoBD;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing User and Friendship entities.
@@ -18,7 +21,8 @@ import java.util.*;
  */
 public class Service {
     private final Repository<Long, User> userRepo; // Repository for User entities
-    private final Repository<Tuple<Long, Long>, Friendship> friendshipRepo; // Repository for Friendship entities
+    private final Repository<Tuple<Long, Long>, Friendship> friendshipRepo;// Repository for Friendship entities
+    private final Repository<Long, Message> messageRepo;
     private final Map<Long, List<Long>> adjList = new HashMap<>(); // Adjacency list for friendships
     private final UserValidator userValidator = new UserValidator();
     private final FriendshipValidator friendshipValidator = new FriendshipValidator();
@@ -28,9 +32,10 @@ public class Service {
      * @param userRepo the user repository
      * @param friendshipRepo the friendship repository
      */
-    public Service(Repository<Long, User> userRepo, Repository<Tuple<Long, Long>, Friendship> friendshipRepo) {
+    public Service(Repository<Long, User> userRepo, Repository<Tuple<Long, Long>, Friendship> friendshipRepo, Repository<Long, Message> messageRepo) {
         this.userRepo = userRepo;
         this.friendshipRepo = friendshipRepo;
+        this.messageRepo = messageRepo;
         //this.populate(); // Populate users' friends from existing friendships
         buildAdjacencyList(); // Build the adjacency list for friendship connections
     }
@@ -340,6 +345,71 @@ public class Service {
         addFriendship(id1, id2);
     }
 
+    public List<Message> getMessagesBetween(User user, User friend){
+
+        Collection<Message> messages = (Collection<Message>) messageRepo.findAll();
+
+        return messages.stream()
+                .filter( m -> (m.getFrom().equals(user) && m.getTo().contains(userRepo.findOne(friend.getId()).get()))
+                        || (m.getFrom().equals(friend) && m.getTo().contains(userRepo.findOne(user.getId()).get())))
+                .sorted(Comparator.comparing(Message::getDate))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+    }
 
 
+    public boolean addMessage(User from, User to, String msg){
+
+        try{
+
+            Message message = new Message(from, Collections.singletonList(to), msg);
+            messageRepo.save(message);
+
+            List<Message> messagesBetweenUsers = getMessagesBetween(from, to);
+
+            if(messagesBetweenUsers.size() > 1){
+
+                Message oldReplyMessage = messagesBetweenUsers.get(messagesBetweenUsers.size() - 2);
+                Message newReplyMessage = messagesBetweenUsers.get(messagesBetweenUsers.size() - 1);
+                oldReplyMessage.setReply(newReplyMessage);
+                messageRepo.update(oldReplyMessage);
+
+            }
+
+            return true;
+
+        }catch (ValidationException ve){
+            System.out.println("User error");
+        } catch (Exception ex){
+            System.out.println("Message error");
+        }
+
+        return false;
+
+    }
+
+
+    public User findUserByEmail(String emailInput) {
+        for(User u : userRepo.findAll()){
+            if(u.getEmail().equals(emailInput) ){
+                return u;
+            }
+        }
+        return null;
+    }
+
+    public Optional<User> update_user(User user) {
+
+        Optional<User> oldUser = userRepo.findOne(user.getId());
+        if (oldUser.isPresent()) {
+
+            Optional<User> newUser = userRepo.update(user);
+            if (newUser.isEmpty()) {
+                return newUser;
+            }
+
+        }
+
+        return oldUser;
+    }
 }

@@ -1,0 +1,47 @@
+/* Setări globale pentru fonturi și culori */
+.root {
+    -fx-font-family: 'Arial', sans-serif;
+    -fx-background-color: purple; /* Gri deschis pentru fundal */
+}
+
+.button {
+    -fx-background-color: #6a1b9a; /* Mov pentru butoane */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 5px;
+}
+
+.button:hover {
+    -fx-background-color: #8e24aa; /* Mov mai deschis la hover */
+}
+
+.text-field {
+    -fx-background-color: #e8eaf6; /* Albastru foarte deschis pentru TextField */
+    -fx-border-color: #5c6bc0; /* Albastru închis pentru bordură */
+    -fx-border-radius: 5px;
+    -fx-padding: 10px;
+}
+
+.list-view {
+    -fx-background-color: darkblue; /* Alb pentru ListView */
+    -fx-border-color: #9575cd; /* Mov deschis pentru bordură */
+    -fx-border-radius: 5px;
+    -fx-cell-size: 40px;
+}
+
+.list-view .list-cell {
+    -fx-font-size: 14px;
+    -fx-padding: 5px;
+    -fx-text-fill: #4a148c; /* Mov închis pentru textul din listă */
+}
+
+.vbox {
+    -fx-spacing: 15px;
+    -fx-padding: 20px;
+}
+
+.hbox {
+    -fx-spacing: 15px;
+    -fx-alignment: center;
+}

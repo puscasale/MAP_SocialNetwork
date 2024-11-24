@@ -95,9 +95,11 @@ public class UserRepoBD implements Repository<Long, User> {
     public Optional<User> save(User entity) {
         int rez = -1;
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("INSERT INTO users (firstname, lastname) VALUES (?, ?)")) {
+             PreparedStatement statement = connection.prepareStatement("INSERT INTO users (firstname, lastname,email, pasword) VALUES (?, ?,?,?)")) {
             statement.setString(1, entity.getFirstName());
             statement.setString(2, entity.getLastName());
+            statement.setString(3, entity.getEmail());
+            statement.setString(4, entity.getPassword());
             rez = statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -124,10 +126,12 @@ public class UserRepoBD implements Repository<Long, User> {
         validator.validate(entity);
         Optional<User> existingUser = Optional.ofNullable(users.get(entity.getId()));
         try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement statement = connection.prepareStatement("UPDATE users SET firstname = ?, lastname = ? WHERE user_id = ?")) {
+             PreparedStatement statement = connection.prepareStatement("UPDATE users SET firstname = ?, lastname = ?, email = ?, pasword = ? WHERE user_id = ?")) {
             statement.setString(1, entity.getFirstName());
             statement.setString(2, entity.getLastName());
-            statement.setLong(3, entity.getId());
+            statement.setString(3, entity.getEmail());
+            statement.setString(4, entity.getPassword());
+            statement.setLong(5, entity.getId());
 
             rowsAffected = statement.executeUpdate();
         } catch (SQLException e) {

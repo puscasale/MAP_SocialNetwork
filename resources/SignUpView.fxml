@@ -1,27 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Text?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.SignUpController">
-    <!-- Titlu -->
-    <Text text="Sign Up" style="-fx-font-size: 40px; -fx-font-weight: bold;" layoutX="150" layoutY="50"/>
+<GridPane alignment="center" hgap="10" style="-fx-background-color: linear-gradient(to bottom right, blue, purple); -fx-padding: 20px;" vgap="10" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="javafx.SignUpController">
+    <padding>
+        <Insets bottom="10" left="10" right="10" top="10" />
+    </padding>
 
-    <!-- Câmp pentru first name -->
-    <TextField fx:id="firstNameField" promptText="First Name" layoutX="100" layoutY="150" prefWidth="300"/>
+    <!-- Title -->
+    <Text fill="#fffdfd" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" text="Sign Up" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-    <!-- Câmp pentru last name -->
-    <TextField fx:id="lastNameField" promptText="Last Name" layoutX="100" layoutY="200" prefWidth="300"/>
+    <!-- First Name -->
+    <Text fill="#fff9f9" style="-fx-font-size: 16px; -fx-text-fill: white;" text="First Name:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+    <TextField fx:id="firstName" style="-fx-background-color: #f0f8ff; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-padding: 10px;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-    <!-- Câmp pentru email -->
-    <TextField fx:id="emailField" promptText="Email" layoutX="100" layoutY="250" prefWidth="300"/>
+    <!-- Last Name -->
+    <Text fill="WHITE" style="-fx-font-size: 16px; -fx-text-fill: white;" text="Last Name:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+    <TextField fx:id="lastName" style="-fx-background-color: #f0f8ff; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-padding: 10px;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-    <!-- Câmp pentru parolă -->
-    <PasswordField fx:id="passwordField" promptText="Password" layoutX="100" layoutY="300" prefWidth="300"/>
+    <!-- Email -->
+    <Text fill="WHITE" style="-fx-font-size: 16px; -fx-text-fill: white;" text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+    <TextField fx:id="email" style="-fx-background-color: #f0f8ff; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-padding: 10px;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-    <!-- Buton Sign Up -->
-    <Button text="Sign Up" layoutX="100" layoutY="350" prefWidth="300" onAction="#handleSignUp"/>
-</AnchorPane>
+    <!-- Password -->
+    <Text fill="WHITE" style="-fx-font-size: 16px; -fx-text-fill: white;" text="Password:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+    <PasswordField fx:id="password" style="-fx-background-color: #f0f8ff; -fx-text-fill: #333333; -fx-font-size: 14px; -fx-padding: 10px;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+    <!-- Sign Up Button -->
+    <Button onAction="#handleSignUp" style="-fx-background-color: #4c6ef5; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10px 20px; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Sign Up" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+    <!-- Back Button -->
+    <Button onAction="#onButtonBackClicked" style="-fx-background-color: #4c6ef5; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10px 20px; -fx-border-radius: 5px; -fx-background-radius: 5px;" text="Back" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+   <columnConstraints>
+      <ColumnConstraints />
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+</GridPane>

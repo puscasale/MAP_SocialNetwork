@@ -1,31 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="514.0" prefWidth="596.0" style="-fx-background-color: #F4F4F9;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.MainController">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: linear-gradient(to bottom right, darkblue, purple);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.MainController">
     <children>
-        <!-- Titlu pentru fereastra -->
-        <Text fill="#4B0082" layoutX="100.0" layoutY="50.0" text="Lista Prietenilor" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+        <!-- Poza utilizatorului -->
+        <ImageView fx:id="profileImage" fitHeight="252.0" fitWidth="547.0" layoutX="-26.0" layoutY="32.0" preserveRatio="true">
+            <Image url="@images/corgi_removed.png" />
+        </ImageView>
 
-        <!-- ListView pentru afișarea prietenilor -->
-        <ListView fx:id="friendsListView" layoutX="50.0" layoutY="100.0" prefHeight="300.0" prefWidth="350.0"
-                  style="-fx-background-color: #D8B4F7; -fx-border-color: #4B0082; -fx-border-width: 2px; -fx-font-size: 14px;" />
+        <!-- Text pentru nume și email -->
+        <VBox alignment="CENTER_LEFT" layoutX="200.0" layoutY="100.0" spacing="10">
+            <Text fx:id="usernameText" fill="white" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Text fx:id="emailText" fill="white" style="-fx-font-size: 14px;" />
+        </VBox>
 
-        <!-- Câmp pentru primul nume al prietenului -->
-        <TextField fx:id="fisrt_name" layoutX="50.0" layoutY="420.0" prefWidth="150.0" promptText="First Name" />
+        <!-- Separator pentru secțiunea de modificări -->
+        <Separator layoutX="-3.0" layoutY="227.0" prefHeight="12.0" prefWidth="878.0" />
 
-        <!-- Câmp pentru al doilea nume al prietenului -->
-        <TextField fx:id="last_name" layoutX="210.0" layoutY="420.0" prefWidth="150.0" promptText="Last Name" />
+        <!-- Butoane pentru modificare -->
+        <Button onAction="#handleChangeFirstName" layoutX="276.0" layoutY="371.0" prefWidth="200.0" style="-fx-background-color: #0288D1; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px 20px;" text="Change First Name" />
+        <Button onAction="#handleChangeLastName" layoutX="538.0" layoutY="371.0" prefWidth="200.0" style="-fx-background-color: #0288D1; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px 20px;" text="Change Last Name" />
+        <Button onAction="#handleChangeEmail" layoutX="276.0" layoutY="455.0" prefWidth="200.0" style="-fx-background-color: #0288D1; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px 20px;" text="Change Email" />
+        <Button onAction="#handleChangePassword" layoutX="538.0" layoutY="455.0" prefWidth="200.0" style="-fx-background-color: #0288D1; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px 20px;" text="Change Password" />
 
+        <!-- Butoane de acțiuni -->
+        <Button layoutY="296.0" onAction="#handleDeleteAccount" prefHeight="58.0" prefWidth="200.0" style="-fx-background-color: #F44336; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px 20px;" text="Delete Account" />
+        <Button layoutY="426.0" onAction="#onBackButtonClicked" prefHeight="58.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px 20px;" text="Exit" />
+        <TextField fx:id="text_field" layoutX="276.0" layoutY="274.0" prefHeight="51.0" prefWidth="461.0" promptText="Edit...">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </TextField>
+        <Separator layoutX="189.0" layoutY="8.0" orientation="VERTICAL" prefHeight="634.0" prefWidth="22.0" />
 
+        <!-- Butoane de sus -->
+        <Button minHeight="-Infinity" mnemonicParsing="false" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #6A1B9A; -fx-text-fill: white;" text="Profile" />
+        <Button layoutX="400.0" onAction="#onFriendRequestButton" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Requests" />
+        <Button layoutX="600.0" mnemonicParsing="false" onAction="#onFriendsButtonClicked" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #0288D1; -fx-text-fill: white;" text="Friends" />
+        <Button onAction="#onChatButtonClicked" layoutX="200.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #8E24AA; -fx-text-fill: white;" text="Chat" />
 
-        <!-- Buton pentru ștergerea unui prieten -->
-        <Button layoutX="210.0" layoutY="460.0" onAction="#removeFriend" style="-fx-background-color: #4B0082; -fx-text-fill: white;" text="Remove Friend" />
-
-        <!-- Buton pentru navigarea la pagina de cereri -->
-        <Button layoutX="400.0" layoutY="420.0" prefWidth="130.0"
-                onAction="#onFriendRequestButton" style="-fx-background-color: #6A1B9A; -fx-text-fill: white;" text="View Requests" />
+        <Text fill="#fff6f6" layoutX="224.0" layoutY="88.0" strokeType="OUTSIDE" strokeWidth="0.0" text="First Name:">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Text>
+        <Text fill="WHITE" layoutX="224.0" layoutY="141.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Last Name:">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Text>
+        <Text fill="WHITE" layoutX="224.0" layoutY="201.0" strokeType="OUTSIDE" strokeWidth="0.0" text="E-mail:">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Text>
+      <Label fx:id="first_name" layoutX="318.0" layoutY="72.0" prefHeight="19.0" prefWidth="70.0" textFill="#fffbfb">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label fx:id="last_name" layoutX="318.0" layoutY="127.0" textFill="WHITE">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label fx:id="email" layoutX="303.0" layoutY="186.0" textFill="#fffefe">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
     </children>
 </AnchorPane>
