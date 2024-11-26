@@ -1,4 +1,4 @@
-package javafx;
+package controller;
 
 import domain.User;
 import javafx.application.Platform;
@@ -34,7 +34,9 @@ public class LoginController {
 
     /**
      * This method is called when the "Login" button is pressed.
-     * It retrieves the email and password, checks the login credentials, and opens the main menu if successful.
+     * It retrieves the email and password from the input fields,
+     * checks the login credentials using the service, and opens the main menu if successful.
+     * If login fails, an error message is shown.
      */
     @FXML
     private void handleLogin() {
@@ -45,25 +47,20 @@ public class LoginController {
         loggedInUser = srv.login(email, password);
 
         if (loggedInUser != null) {
-            System.out.println("User logged in: " + loggedInUser.getEmail());
 
+            System.out.println("User logged in: " + loggedInUser.getEmail());
             showMainMenu();
         } else {
+
             showAlert("Login failed, please check your credentials.");
         }
     }
 
-    /**
-     * Method to retrieve the currently logged-in user.
-     * @return the logged-in user or null if no user is logged in
-     */
-    public User getLoggedInUser() {
-        return loggedInUser;
-    }
 
     /**
-     * This method shows an error message in an alert dialog.
-     * @param message the error message
+     * Displays an alert with an error message.
+     * This method is used to show error messages when login fails.
+     * @param message the error message to display
      */
     private void showAlert(String message) {
         Alert alert = new Alert(AlertType.ERROR);
@@ -74,21 +71,24 @@ public class LoginController {
     }
 
     /**
-     * This method loads and opens the main menu window of the application.
-     * It loads the FXML file for the main scene and sets the logged-in user.
+     * Loads and opens the main menu window of the application.
+     * It loads the FXML file for the main scene and sets the logged-in user in the main controller.
      */
     private void showMainMenu() {
         try {
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
+
 
             Stage stage = (Stage) emailField.getScene().getWindow();
 
-            Scene scene = new Scene(loader.load(),800,600);
+
+            Scene scene = new Scene(loader.load(), 800, 600);
 
             stage.setScene(scene);
 
-            MainController mainController = loader.getController();
 
+            MainController mainController = loader.getController();
             mainController.setService(srv);
             mainController.setUser(loggedInUser);
 
@@ -96,31 +96,33 @@ public class LoginController {
             stage.show();
 
             System.out.println("Login successful, opening main menu...");
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-
     /**
      * Sets the login service.
-     * @param srv the login service
+     * This method is used to inject the service used for login operations.
+     * @param srv the service used for login
      */
     public void setService(Service srv) {
-        this.srv = srv;
+        this.srv = srv;  // Set the login service
     }
 
     /**
-     * This method is triggered when the "Don't have an account? Sign up" link is clicked.
-     * It navigates to the Sign-Up page.
+     * This method is triggered when the "Don't have an account? Sign up" hyperlink is clicked.
+     * It navigates to the Sign-Up page by loading the corresponding FXML file.
      */
     @FXML
     private void handleSignUpRedirect() {
         try {
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/SignUpView.fxml"));
+
             Stage stage = (Stage) signUpLink.getScene().getWindow();
-            Scene scene = new Scene(loader.load(),800,600);
+
+            Scene scene = new Scene(loader.load(), 800, 600);
 
             SignUpController signUpController = loader.getController();
             signUpController.setService(srv);
@@ -133,9 +135,14 @@ public class LoginController {
         }
     }
 
+    /**
+     * This method is triggered when the "Exit" action is performed.
+     * It closes the application.
+     */
     @FXML
     private void handleExit() {
-        Platform.exit();  // Închide aplicația
+        Platform.exit();
     }
 
 }
+

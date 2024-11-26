@@ -4,13 +4,13 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: linear-gradient(to bottom right, darkblue, purple);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.RequestsController">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: linear-gradient(to bottom right, darkblue, purple);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.RequestsController">
     <children>
         <!-- Butoane de sus -->
         <Button onAction="#onProfile" minHeight="-Infinity" mnemonicParsing="false" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #6A1B9A; -fx-text-fill: white;" text="Profile" />
         <Button layoutX="400.0" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="Requests" />
         <Button onAction="#onFriendsButtonClicked" layoutX="600.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #0288D1; -fx-text-fill: white;" text="Friends" />
-        <Button layoutX="200.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #8E24AA; -fx-text-fill: white;" text="Chat" />
+        <Button onAction="#onChat" layoutX="200.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="200.0" style="-fx-background-color: #8E24AA; -fx-text-fill: white;" text="Chat" />
         <TextField layoutX="320.0" layoutY="70.0" opacity="0.0" />
         <TextField layoutX="306.0" layoutY="122.0" opacity="0.0" />
         <TextField layoutX="317.0" layoutY="181.0" opacity="0.0" />

@@ -1,15 +1,12 @@
-package javafx;
+package controller;
 
 import domain.User;
-import javafx.LoginController;
-import javafx.MainController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -33,11 +30,22 @@ public class SignUpController {
     @FXML
     private PasswordField password;
 
+    /**
+     * Sets the service for this controller.
+     * This method allows the injection of the service to interact with the user data.
+     * @param service the service used for handling user data operations
+     */
     public void setService(Service service) {
         this.srv = service;
     }
 
-    // Handle sign-up button click
+    /**
+     * This method is called when the "Sign Up" button is pressed.
+     * It retrieves the user input, checks for empty fields and email uniqueness,
+     * and creates a new user if all conditions are met.
+     * If the sign-up is successful, it loads the main view of the application.
+     * If there are issues (like empty fields or an existing email), it shows an alert.
+     */
     @FXML
     private void handleSignUp(ActionEvent event) {
         String fn = firstName.getText();
@@ -46,32 +54,30 @@ public class SignUpController {
         System.out.println(emailInput);
         String pass = password.getText();
 
-        // Check if fields are empty
         if (fn.isEmpty() || ln.isEmpty() || emailInput.isEmpty() || pass.isEmpty()) {
             showAlert("All fields must be filled!");
             return;
         }
 
-        // Check if the email already exists
         if (srv.findUserByEmail(emailInput) != null) {
             showAlert("Email already exists!");
             return;
         }
 
-        // Create new user
+
         User newUser = new User(fn, ln, emailInput, pass);
         srv.addUser(newUser);
 
         try {
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
-            Parent root = loader.load();  // Încarcă FXML-ul pentru pagina principală
+            Parent root = loader.load();
 
-            // Folosește un element existent din scena curentă pentru a obține Stage (de exemplu, requestsList)
-            Stage stage = (Stage) firstName.getScene().getWindow();  // Poți folosi requestsList sau orice alt element valid
+
+            Stage stage = (Stage) firstName.getScene().getWindow();
             stage.setTitle("Social Network");
-            stage.setScene(new Scene(root,800,600));
+            stage.setScene(new Scene(root, 800, 600));
 
-            // Setează controller-ul pentru MainView
             MainController mainController = loader.getController();
             mainController.setService(srv);
             mainController.setUser(newUser);
@@ -83,21 +89,24 @@ public class SignUpController {
         }
     }
 
-    // Handle back button click
+    /**
+     * This method is called when the "Back" button is pressed.
+     * It navigates the user back to the login page by loading the LoginView.fxml file.
+     */
     @FXML
     public void onButtonBackClicked() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginView.fxml"));
-            Parent root = loader.load();  // Încarcă FXML-ul pentru pagina principală
 
-            // Folosește un element existent din scena curentă pentru a obține Stage (de exemplu, requestsList)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/LoginView.fxml"));
+            Parent root = loader.load();
+
             Stage stage = (Stage) lastName.getScene().getWindow();
             stage.setTitle("Social Network");
-            stage.setScene(new Scene(root,800,600));
+            stage.setScene(new Scene(root, 800, 600));
 
-            // Setează controller-ul pentru MainView
-            LoginController mainController = loader.getController();
-            mainController.setService(srv);
+
+            LoginController loginController = loader.getController();
+            loginController.setService(srv);
 
             stage.show();
 
@@ -106,7 +115,11 @@ public class SignUpController {
         }
     }
 
-    // Show alert with the given message
+    /**
+     * Shows an alert with the provided message.
+     * This method is used to display error or informational messages to the user.
+     * @param message the message to display in the alert
+     */
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Sign Up");
@@ -115,3 +128,4 @@ public class SignUpController {
         alert.showAndWait();
     }
 }
+

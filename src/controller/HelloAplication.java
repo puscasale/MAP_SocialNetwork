@@ -1,4 +1,4 @@
-package javafx;
+package controller;
 
 import domain.Friendship;
 import domain.Message;
@@ -10,10 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import repository.FriendshipsRepoBD;
-import repository.MessageRepoBD;
-import repository.Repository;
-import repository.UserRepoBD;
+import repository.*;
 import service.Service;
 
 public class HelloAplication extends Application {
@@ -45,7 +42,6 @@ public class HelloAplication extends Application {
         primaryStage.setTitle("Social Network");
         primaryStage.setScene(scene);
 
-        // Setează fereastra pe tot ecranul
 
 
         primaryStage.show();

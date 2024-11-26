@@ -3,6 +3,7 @@ package repository;
 import domain.Entity;
 import domain.validators.ValidationException;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -61,4 +62,5 @@ public interface Repository<ID, E extends Entity<ID>> {
      * if the entity is not valid.
      */
     Optional<E> update(E entity);
+
 }

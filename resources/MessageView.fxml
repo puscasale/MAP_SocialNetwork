@@ -6,7 +6,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="javafx.MessageController"
+      fx:controller="controller.MessageController"
       spacing="10"
       alignment="CENTER"
       prefHeight="400.0"

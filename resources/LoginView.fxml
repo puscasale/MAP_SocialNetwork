@@ -7,7 +7,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.shape.*?>
 
-<VBox alignment="CENTER" spacing="20" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="javafx.LoginController" style="-fx-background-color: linear-gradient(to bottom right, blue, purple); -fx-padding: 20px;">
+<VBox alignment="CENTER" spacing="20" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LoginController" style="-fx-background-color: linear-gradient(to bottom right, blue, purple); -fx-padding: 20px;">
     <padding>
         <Insets bottom="10" left="10" right="10" top="10" />
     </padding>

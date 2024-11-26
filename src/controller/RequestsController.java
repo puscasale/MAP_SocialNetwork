@@ -1,4 +1,4 @@
-package javafx;
+package controller;
 
 import domain.Friendship;
 import domain.User;
@@ -11,7 +11,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -37,49 +36,61 @@ public class RequestsController {
     @FXML
     private ListView<String> requestsList;
 
-    @FXML
-    private Label messageLabel;
 
+    /**
+     * Sets the service instance to interact with the application logic.
+     * @param service the service instance
+     */
     public void setService(Service service) {
         this.srv = service;
     }
 
+    /**
+     * Sets the logged-in user and loads their friend requests into the view.
+     * @param loggedInUser the currently logged-in user
+     */
     public void setUser(User loggedInUser) {
         this.user = loggedInUser;
         loadRequestsList();
     }
 
+    /**
+     * Loads the friend requests into the list view and clears the previous data.
+     */
     private void loadRequestsList() {
-        requestsList.getItems().clear(); // Golește lista înainte de populare
-        friendshipsList.clear(); // Golește lista auxiliară
+        requestsList.getItems().clear();
+        friendshipsList.clear();
 
-        // Obține lista de prietenii primite
-        List<Friendship> friendships = getReceivedFriendRequests(); // Modificat pentru a obține doar cererile primite
-        ObservableList<String> friendDetails = FXCollections.observableArrayList(); // Creează o listă observabilă pentru detalii
+        List<Friendship> friendships = getReceivedFriendRequests();
+        ObservableList<String> friendDetails = FXCollections.observableArrayList();
 
         for (Friendship friendship : friendships) {
             User friend = (friendship.getIdUser1().equals(user.getId())) ?
                     srv.find_user(friendship.getIdUser2()).get() :
                     srv.find_user(friendship.getIdUser1()).get();
 
-            // Construiește textul pentru fiecare prietenie
+
             String detail = "Name: " + friend.getFirstName() + " " + friend.getLastName() +
                     ", Date: " + friendship.getDate().toLocalDate() +
                     ", Status: " + friendship.getFriendshiprequest();
             friendDetails.add(detail);
 
-            friendshipsList.add(friendship); // Salvează obiectul Friendship în lista auxiliară
+            friendshipsList.add(friendship);
         }
 
-        requestsList.setItems(friendDetails); // Setează lista observabilă în ListView
+        requestsList.setItems(friendDetails);
     }
 
+    /**
+     * Fetches the list of received friend requests for the logged-in user.
+     * @return a list of pending friend requests
+     */
     private List<Friendship> getReceivedFriendRequests() {
         Iterable<Friendship> iterable = srv.getFriendships();
         List<Friendship> friendships = new ArrayList<>();
 
         for (Friendship friendship : iterable) {
-            // Verifică dacă utilizatorul logat este destinatarul cererii de prietenie (idUser2)
+
             if ((friendship.getIdUser2().equals(user.getId())) ) {
                 friendships.add(friendship);
             }
@@ -89,27 +100,15 @@ public class RequestsController {
     }
 
 
-
-
-    private List<Friendship> getUFriends(){
-
-        Iterable<Friendship> iterable = srv.getFriendships();
-
-        List<Friendship> friendships = new ArrayList<>();
-        for (Friendship friendship : iterable) {
-            if(friendship.getIdUser1().equals(user.getId()) || friendship.getIdUser2().equals(user.getId()))
-                friendships.add(friendship);
-        }
-
-        return friendships;
-    }
-
+    /**
+     * Approves the selected friend request if it is in a pending state.
+     */
     public void AcceptButton() {
         int selectedIndex = requestsList.getSelectionModel().getSelectedIndex();
-        if (selectedIndex != -1) { // Verifică dacă a fost selectat un element
-            Friendship selectedFriendship = friendshipsList.get(selectedIndex); // Preia obiectul Friendship
+        if (selectedIndex != -1) {
+            Friendship selectedFriendship = friendshipsList.get(selectedIndex);
             if (selectedFriendship.getFriendshiprequest() == Friendshiprequest.PENDING) {
-                srv.manageFriendRequest(selectedFriendship, Friendshiprequest.APROOVED); // Gestionează cererea
+                srv.manageFriendRequest(selectedFriendship, Friendshiprequest.APROOVED);
             } else {
                 showAlert("The request must be PENDING in order to APPROVE it");
             }
@@ -117,6 +116,9 @@ public class RequestsController {
         loadRequestsList();
     }
 
+    /**
+     * Rejects the selected friend request if it is in a pending state.
+     */
     public void RejectButton() {
         int selectedIndex = requestsList.getSelectionModel().getSelectedIndex();
         if (selectedIndex != -1) {
@@ -130,7 +132,9 @@ public class RequestsController {
         loadRequestsList();
     }
 
-
+    /**
+     * Sends a friend request to a user identified by their first and last name.
+     */
     public void SendRequest() {
         String ln = last_name.getText();
         String fn = fisrt_name.getText();
@@ -139,22 +143,17 @@ public class RequestsController {
             return;
         }
 
-
-        User friend = srv.findUserByName(fn,ln);
+        User friend = srv.findUserByName(fn, ln);
 
         if (friend == null) {
             showAlert("Friend not found.");
         } else {
-            srv.createFriendshipRequest(user.getId(),friend.getId());
-            showAlert("Friend request send successfully!");
-
+            srv.createFriendshipRequest(user.getId(), friend.getId());
+            showAlert("Friend request sent successfully!");
         }
         last_name.clear();
         fisrt_name.clear();
-
     }
-
-
 
     /**
      * Shows an informational alert with the given message.
@@ -168,16 +167,18 @@ public class RequestsController {
         alert.showAndWait();
     }
 
+    /**
+     * Navigates back to the user's profile view.
+     * @param actionEvent the action event triggered by the button
+     */
     public void onProfile(ActionEvent actionEvent) {
-        try{
+        try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
             Parent root = loader.load();
 
-
             Stage stage = (Stage) fisrt_name.getScene().getWindow();
             stage.setTitle("Social Network");
-            stage.setScene(new Scene(root,800,600));
-
+            stage.setScene(new Scene(root, 800, 600));
 
             MainController mainController = loader.getController();
             mainController.setService(srv);
@@ -189,16 +190,18 @@ public class RequestsController {
         }
     }
 
+    /**
+     * Opens the friends view to display the user's friends.
+     * @param actionEvent the action event triggered by the button
+     */
     public void onFriendsButtonClicked(ActionEvent actionEvent) {
-        try{
+        try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FriendsView.fxml"));
             Parent root = loader.load();
 
-
             Stage stage = (Stage) fisrt_name.getScene().getWindow();
             stage.setTitle("Social Network");
-            stage.setScene(new Scene(root,800,600));
-
+            stage.setScene(new Scene(root, 800, 600));
 
             FriendsController mainController = loader.getController();
             mainController.setService(srv);
@@ -209,5 +212,29 @@ public class RequestsController {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Opens the chat view to enable chatting with friends.
+     * @param actionEvent the action event triggered by the button
+     */
+    public void onChat(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ChatView.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) fisrt_name.getScene().getWindow();
+            stage.setTitle("Social Network");
+            stage.setScene(new Scene(root, 800, 600));
+
+            ChatController mainController = loader.getController();
+            mainController.setService(srv);
+            mainController.setUser(user);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

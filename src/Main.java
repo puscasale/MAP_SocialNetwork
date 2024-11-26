@@ -1,6 +1,4 @@
-import javafx.HelloAplication;
-import javafx.application.Application;
-import javafx.stage.Stage;
+import controller.HelloAplication;
 
 public class Main  {
     public static void main(String[] args) {

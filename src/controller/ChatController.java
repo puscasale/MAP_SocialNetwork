@@ -1,8 +1,7 @@
-package javafx;
+package controller;
 
 import domain.Message;
 import domain.User;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class ChatController {
-
     private Service service;
     private User user;
 
@@ -27,34 +25,39 @@ public class ChatController {
     @FXML
     private ListView<String> chatList;
 
+    /**
+     * Sets the service instance used for operations.
+     * @param service the service instance
+     */
     public void setService(Service service) {
         this.service = service;
     }
 
+    /**
+     * Sets the logged-in user and loads their chat list.
+     * @param user the logged-in user
+     */
     public void setUser(User user) {
         this.user = user;
         loadChatList();
     }
 
+    /**
+     * Loads the chat list for the logged-in user.
+     * It retrieves friends, their latest message, and populates the chat list.
+     */
     private void loadChatList() {
-        // Găsește toți prietenii utilizatorului
         List<User> friends = service.getFriends(user);
         ObservableList<String> chatItems = FXCollections.observableArrayList();
 
         for (User friend : friends) {
-            // Obține ultimul mesaj trimis între utilizator și prieten
-            List<Message> messages = service.getMessagesBetween(user, friend);
-            String lastMessage = (messages.isEmpty()) ? "No messages yet" : messages.get(messages.size() - 1).getMessage();
-
-            // Construiește textul pentru ListView
-            String chatText = friend.getFirstName() + " " + friend.getLastName() + ": " + lastMessage;
+            String chatText = friend.getFirstName() + " " + friend.getLastName();
             chatItems.add(chatText);
         }
 
         chatListItems.setAll(chatItems);
         chatList.setItems(chatListItems);
 
-        // Adaugă un event listener pentru a deschide conversația când se selectează un prieten
         chatList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 openChatWithFriend(newValue);
@@ -62,71 +65,92 @@ public class ChatController {
         });
     }
 
+
+    /**
+     * Opens a chat window with the selected friend.
+     * It navigates to the MessageView.fxml and passes the selected friend's details.
+     * @param chatText the selected chat text containing the friend's name
+     */
     private void openChatWithFriend(String chatText) {
-        // Găsește numele prietenului din textul selecționat
+
         String[] parts = chatText.split(":");
         String[] friendName = parts[0].split(" ");
         String firstName = friendName[0];
         String lastName = friendName[1];
 
 
-        // Căutăm prietenul în lista de prieteni
-        User friend = service.findUserByName(firstName,lastName);
+        User friend = service.findUserByName(firstName, lastName);
         if (friend != null) {
-            // Încarcă conversația
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/MessageView.fxml"));
-                Parent root = loader.load();
+            onMessage(friend);
 
-                MessageController messageController = loader.getController();
-                messageController.setService(service);
-                messageController.setUser(user);
-                messageController.setFriend(friend);
-
-                Stage stage = (Stage) chatList.getScene().getWindow();
-                stage.setTitle("Chat with " + friend.getFirstName() + " " + friend.getLastName());
-                stage.setScene(new Scene(root, 800, 600));
-                stage.show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
+
+    public void onMessage(User friend) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MessageView.fxml"));
+            Parent root = loader.load();
+
+
+            MessageController messageController = loader.getController();
+            messageController.setService(service);
+            messageController.setUser(user);
+            messageController.setFriend(friend);
+
+
+            Stage stage = (Stage) chatList.getScene().getWindow();
+            stage.setTitle("Chat with " + friend.getFirstName() + " " + friend.getLastName());
+            stage.setScene(new Scene(root, 800, 600));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Navigates to the profile view.
+     * It switches the current scene to the MainView.fxml.
+     */
     public void onProfile(ActionEvent actionEvent) {
-        try{
+        try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
             Parent root = loader.load();
 
 
             Stage stage = (Stage) chatList.getScene().getWindow();
             stage.setTitle("Social Network");
-            stage.setScene(new Scene(root,800,600));
-
+            stage.setScene(new Scene(root, 800, 600));
 
             MainController mainController = loader.getController();
             mainController.setService(service);
             mainController.setUser(user);
             stage.show();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void onFriendRequestButton(){
+    /**
+     * Navigates to the friend requests view.
+     * It switches the current scene to the RequestsView.fxml.
+     */
+    public void onFriendRequestButton() {
         openMainScene();
     }
 
+    /**
+     * Opens the friend requests scene.
+     * Loads the RequestsView.fxml and switches the current view.
+     */
     private void openMainScene() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/RequestsView.fxml"));
-            Parent root = loader.load();  // Încarcă FXML-ul pentru noua scenă
+            Parent root = loader.load();
 
-            Stage stage = (Stage) chatList.getScene().getWindow();  // Folosește orice element valid din scenă curentă
+            Stage stage = (Stage) chatList.getScene().getWindow();
             stage.setTitle("Friend Requests");
-            stage.setScene(new Scene(root,800,600));
+            stage.setScene(new Scene(root, 800, 600));
 
-            // Setează controller-ul pentru RequestsView
             RequestsController requestsController = loader.getController();
             requestsController.setService(service);
             requestsController.setUser(user);
@@ -137,24 +161,27 @@ public class ChatController {
         }
     }
 
+    /**
+     * Navigates to the friends view.
+     * It switches the current scene to the FriendsView.fxml.
+     * @param actionEvent the action event triggered by the button click
+     */
     public void onFriendsButtonClicked(ActionEvent actionEvent) {
-        try{
+        try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/FriendsView.fxml"));
             Parent root = loader.load();
 
-
             Stage stage = (Stage) chatList.getScene().getWindow();
             stage.setTitle("Social Network");
-            stage.setScene(new Scene(root,800,600));
-
+            stage.setScene(new Scene(root, 800, 600));
 
             FriendsController mainController = loader.getController();
             mainController.setService(service);
             mainController.setUser(user);
             stage.show();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 }
+

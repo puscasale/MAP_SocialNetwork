@@ -1,12 +1,14 @@
 package repository;
 
+import domain.Page;
+import domain.Pageable;
 import domain.User;
 import domain.validators.Validator;
 
 import java.sql.*;
 import java.util.*;
 
-public class UserRepoBD implements Repository<Long, User> {
+public class UserRepoBD implements PagingRepository<Long, User> {
     private String url;
     private String username;
     private String password;
@@ -183,5 +185,44 @@ public class UserRepoBD implements Repository<Long, User> {
         });
     }
 
+
+    @Override
+    public Page<User> findAll(Pageable pageable) {
+        List<User> userList = new ArrayList<>();
+        try(Connection connection= DriverManager.getConnection(url,username,password);
+            PreparedStatement pagePreparedStatement=connection.prepareStatement("SELECT * FROM users " +
+                    "LIMIT ? OFFSET ?");
+
+            PreparedStatement countPreparedStatement = connection.prepareStatement
+                    ("SELECT COUNT(*) AS count FROM users ");
+
+        ) {
+            pagePreparedStatement.setInt(1, pageable.getPageSize());
+            pagePreparedStatement.setInt(2, pageable.getPageSize() * pageable.getPageNumber());
+            try (ResultSet pageResultSet = pagePreparedStatement.executeQuery();
+                 ResultSet countResultSet = countPreparedStatement.executeQuery(); ) {
+                while (pageResultSet.next()) {
+                    Long id = pageResultSet.getLong("user_id");
+                    String firstName = pageResultSet.getString("firstname");
+                    String lastName = pageResultSet.getString("lastname");
+                    String email = pageResultSet.getString("email");
+                    String password = pageResultSet.getString("password");
+                    User user = new User(firstName, lastName, email,password);
+                    user.setId(id);
+                    userList.add(user);
+                }
+                int totalCount = 0;
+                if(countResultSet.next()) {
+                    totalCount = countResultSet.getInt("count");
+                }
+
+                return new Page<>(userList, totalCount);
+
+            }
+        }
+        catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
 
 }

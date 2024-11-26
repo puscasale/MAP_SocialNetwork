@@ -8,12 +8,16 @@ import domain.validators.FriendshipValidator;
 import domain.validators.UserValidator;
 import domain.validators.ValidationException;
 import enums.Friendshiprequest;
+import repository.FriendshipsPagingRepo;
+import repository.MessagePagingRepo;
+import repository.PagingRepository;
 import repository.Repository;
-import repository.UserRepoBD;
+
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Service class for managing User and Friendship entities.
@@ -26,6 +30,20 @@ public class Service {
     private final Map<Long, List<Long>> adjList = new HashMap<>(); // Adjacency list for friendships
     private final UserValidator userValidator = new UserValidator();
     private final FriendshipValidator friendshipValidator = new FriendshipValidator();
+    /*
+    private final PagingRepository<Long, User> userRepo; // Repository for User entities
+    private final FriendshipsPagingRepo<Tuple<Long, Long>, Friendship> friendshipRepo;// Repository for Friendship entities
+    private final MessagePagingRepo<Long, Message> messageRepo;
+
+    public Service(PagingRepository<Long, User> userRepo, FriendshipsPagingRepo<Tuple<Long, Long>, Friendship> friendshipRepo, MessagePagingRepo<Long, Message> messageRepo) {
+        this.userRepo = userRepo;
+        this.friendshipRepo = friendshipRepo;
+        this.messageRepo = messageRepo;
+
+        buildAdjacencyList(); // Build the adjacency list for friendship connections
+    }
+     */
+
 
     /**
      * Constructor for Service class.
@@ -36,7 +54,7 @@ public class Service {
         this.userRepo = userRepo;
         this.friendshipRepo = friendshipRepo;
         this.messageRepo = messageRepo;
-        //this.populate(); // Populate users' friends from existing friendships
+
         buildAdjacencyList(); // Build the adjacency list for friendship connections
     }
 
@@ -147,28 +165,6 @@ public class Service {
             System.out.println("Friendship removed between " + userId1 + " and " + userId2);
         }));
     }
-
-
-    /**
-     * Populates users' friend lists based on existing friendships.
-     */
-    public void populate() {
-        //TODO
-        for (Friendship f : friendshipRepo.findAll()) {
-            Long userId1 = f.getIdUser1(); // Get the first user ID
-            Long userId2 = f.getIdUser2(); // Get the second user ID
-            for (User u : userRepo.findAll()) {
-                if (u.getId().equals(userId1)) {
-                    Optional<User> fr = userRepo.findOne(userId2);
-                    fr.ifPresent(u::addFriend);// Add friend if it matches
-                } else if (u.getId().equals(userId2)) {
-                    Optional<User> fr = userRepo.findOne(userId1);
-                    fr.ifPresent(u::addFriend);// Add friend if it matches
-                }
-            }
-        }
-    }
-
 
 
     /**
@@ -321,11 +317,23 @@ public class Service {
         return null;
     }
 
+    /**
+     * Finds a user in the database by their ID.
+     *
+     * @param idUser The ID of the user to be searched for.
+     * @return An `Optional` containing the found user, or empty if the user does not exist.
+     */
     public Optional<User> find_user(Long idUser) {
         return userRepo.findOne(idUser);
     }
 
-
+    /**
+     * Manages a friend request by updating its status.
+     *
+     * @param friendship The friendship object that needs to be managed.
+     * @param friendshipRequest The new status of the friendship request (e.g., ACCEPTED, REJECTED).
+     * @throws RuntimeException If the friendship does not exist or is not in a PENDING state.
+     */
     public void manageFriendRequest(Friendship friendship, Friendshiprequest friendshipRequest) {
         try {
             if (!friendshipRepo.findOne(friendship.getId()).isPresent()) {
@@ -340,76 +348,111 @@ public class Service {
         }
     }
 
+
+    /**
+     * Creates a new friend request between two specified users by their IDs.
+     *
+     * @param id1 The ID of the first user.
+     * @param id2 The ID of the second user.
+     */
     public void createFriendshipRequest(Long id1, Long id2) {
-        Friendship friendship = new Friendship(id1, id2, LocalDateTime.now());
         addFriendship(id1, id2);
     }
 
-    public List<Message> getMessagesBetween(User user, User friend){
 
+    /**
+     * Retrieves all messages exchanged between two users, sorted chronologically.
+     *
+     * @param user The user whose messages are being queried.
+     * @param friend The friend with whom the messages were exchanged.
+     * @return A list of messages between the user and the friend, sorted by date.
+     */
+    public List<Message> getMessagesBetween(User user, User friend) {
         Collection<Message> messages = (Collection<Message>) messageRepo.findAll();
-
         return messages.stream()
-                .filter( m -> (m.getFrom().equals(user) && m.getTo().contains(userRepo.findOne(friend.getId()).get()))
+                .filter(m -> (m.getFrom().equals(user) && m.getTo().contains(userRepo.findOne(friend.getId()).get()))
                         || (m.getFrom().equals(friend) && m.getTo().contains(userRepo.findOne(user.getId()).get())))
                 .sorted(Comparator.comparing(Message::getDate))
                 .collect(Collectors.toCollection(ArrayList::new));
-
     }
 
-
-    public boolean addMessage(User from, User to, String msg){
-
-        try{
-
+    /**
+     * Adds a new message from one user to another and updates replies if applicable.
+     *
+     * @param from The user sending the message.
+     * @param to The user receiving the message.
+     * @param msg The content of the message.
+     * @return `true` if the message was successfully added, `false` otherwise.
+     */
+    public boolean addMessage(User from, User to, String msg) {
+        try {
             Message message = new Message(from, Collections.singletonList(to), msg);
             messageRepo.save(message);
 
             List<Message> messagesBetweenUsers = getMessagesBetween(from, to);
-
-            if(messagesBetweenUsers.size() > 1){
-
+            if (messagesBetweenUsers.size() > 1) {
                 Message oldReplyMessage = messagesBetweenUsers.get(messagesBetweenUsers.size() - 2);
-                Message newReplyMessage = messagesBetweenUsers.get(messagesBetweenUsers.size() - 1);
-                oldReplyMessage.setReply(newReplyMessage);
+                oldReplyMessage.setReply(messagesBetweenUsers.get(messagesBetweenUsers.size() - 1));
                 messageRepo.update(oldReplyMessage);
-
             }
 
             return true;
-
-        }catch (ValidationException ve){
+        } catch (ValidationException ve) {
             System.out.println("User error");
-        } catch (Exception ex){
+        } catch (Exception ex) {
             System.out.println("Message error");
         }
 
         return false;
-
     }
 
 
+    /**
+     * Finds a user in the database by their email address.
+     *
+     * @param emailInput The email address of the user to search for.
+     * @return The user with the specified email, or `null` if no such user exists.
+     */
     public User findUserByEmail(String emailInput) {
-        for(User u : userRepo.findAll()){
-            if(u.getEmail().equals(emailInput) ){
+        for (User u : userRepo.findAll()) {
+            if (u.getEmail().equals(emailInput)) {
                 return u;
             }
         }
         return null;
     }
 
+    /**
+     * Updates the data of an existing user in the database.
+     *
+     * @param user The user object with the updated information.
+     * @return An `Optional` containing the user before the update, or empty if the update failed.
+     */
     public Optional<User> update_user(User user) {
-
         Optional<User> oldUser = userRepo.findOne(user.getId());
         if (oldUser.isPresent()) {
-
             Optional<User> newUser = userRepo.update(user);
             if (newUser.isEmpty()) {
                 return newUser;
             }
-
         }
 
         return oldUser;
     }
+
+
+    public List<Friendship> getPendingFriendships(Long userId) {
+
+        Iterable<Friendship> allFriendships = friendshipRepo.findAll();
+
+        List<Friendship> pendingFriendships = new ArrayList<>();
+        for (Friendship friendship : allFriendships) {
+            if ( friendship.getIdUser2().equals(userId)&& friendship.getFriendshiprequest().name().equals("PENDING")) {
+                pendingFriendships.add(friendship);
+            }
+        }
+
+        return pendingFriendships;
+    }
+
 }
