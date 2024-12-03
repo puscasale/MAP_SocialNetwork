@@ -1,23 +1,17 @@
 package service;
 
-import domain.Friendship;
-import domain.Message;
-import domain.Tuple;
-import domain.User;
+import domain.*;
 import domain.validators.FriendshipValidator;
 import domain.validators.UserValidator;
 import domain.validators.ValidationException;
 import enums.Friendshiprequest;
-import repository.FriendshipsPagingRepo;
-import repository.MessagePagingRepo;
-import repository.PagingRepository;
+import repository.FriendshipPagingRepo;
 import repository.Repository;
 
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Service class for managing User and Friendship entities.
@@ -25,32 +19,18 @@ import java.util.stream.StreamSupport;
  */
 public class Service {
     private final Repository<Long, User> userRepo; // Repository for User entities
-    private final Repository<Tuple<Long, Long>, Friendship> friendshipRepo;// Repository for Friendship entities
+    private final FriendshipPagingRepo<Tuple<Long, Long>, Friendship> friendshipRepo;// Repository for Friendship entities
     private final Repository<Long, Message> messageRepo;
     private final Map<Long, List<Long>> adjList = new HashMap<>(); // Adjacency list for friendships
     private final UserValidator userValidator = new UserValidator();
     private final FriendshipValidator friendshipValidator = new FriendshipValidator();
-    /*
-    private final PagingRepository<Long, User> userRepo; // Repository for User entities
-    private final FriendshipsPagingRepo<Tuple<Long, Long>, Friendship> friendshipRepo;// Repository for Friendship entities
-    private final MessagePagingRepo<Long, Message> messageRepo;
-
-    public Service(PagingRepository<Long, User> userRepo, FriendshipsPagingRepo<Tuple<Long, Long>, Friendship> friendshipRepo, MessagePagingRepo<Long, Message> messageRepo) {
-        this.userRepo = userRepo;
-        this.friendshipRepo = friendshipRepo;
-        this.messageRepo = messageRepo;
-
-        buildAdjacencyList(); // Build the adjacency list for friendship connections
-    }
-     */
-
 
     /**
      * Constructor for Service class.
      * @param userRepo the user repository
      * @param friendshipRepo the friendship repository
      */
-    public Service(Repository<Long, User> userRepo, Repository<Tuple<Long, Long>, Friendship> friendshipRepo, Repository<Long, Message> messageRepo) {
+    public Service(Repository<Long, User> userRepo, FriendshipPagingRepo<Tuple<Long, Long>, Friendship> friendshipRepo, Repository<Long, Message> messageRepo) {
         this.userRepo = userRepo;
         this.friendshipRepo = friendshipRepo;
         this.messageRepo = messageRepo;
@@ -441,6 +421,14 @@ public class Service {
     }
 
 
+    /**
+     * Retrieves a list of pending friendships for a specific user.
+     * The method fetches all friendships and filters them to find those where the user is the second participant
+     * and the friendship request status is "PENDING".
+     *
+     * @param userId the ID of the user whose pending friendships are to be fetched
+     * @return a List of pending friendships for the specified user
+     */
     public List<Friendship> getPendingFriendships(Long userId) {
 
         Iterable<Friendship> allFriendships = friendshipRepo.findAll();
@@ -453,6 +441,27 @@ public class Service {
         }
 
         return pendingFriendships;
+    }
+
+    /**
+     * Retrieves a paginated list of all friendships from the database
+     * @param pageable the pagination details (page number and page size)
+     * @return a Page object containing the list of friendships for the current page and the total number of friendships
+     */
+    public Page<Friendship> getAllFriendships(Pageable pageable){
+
+        return friendshipRepo.findAllOnPage(pageable);
+    }
+
+    /**
+     * Retrieves a paginated list of friendships for a specific user
+     * @param pageable the pagination details (page number and page size)
+     * @param user the user whose friendships are to be fetched
+     * @return a Page object containing the list of friendships for the user for the current page and the total number of friendships
+     */
+    public Page<Friendship> findUsersFriends(Pageable pageable, User user){
+        return friendshipRepo.getUsersFriends(pageable, user);
+
     }
 
 }

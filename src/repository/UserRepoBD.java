@@ -8,7 +8,7 @@ import domain.validators.Validator;
 import java.sql.*;
 import java.util.*;
 
-public class UserRepoBD implements PagingRepository<Long, User> {
+public class UserRepoBD implements PagingRepo<Long, User> {
     private String url;
     private String username;
     private String password;
@@ -185,44 +185,47 @@ public class UserRepoBD implements PagingRepository<Long, User> {
         });
     }
 
-
+    /**
+     * Retrieves a paginated list of users from the database.
+     * The method fetches a subset of users based on the specified page number and page size.
+     * It also retrieves the total count of users in the database to help with pagination.
+     *
+     * @param pageable the pagination details (page number and page size)
+     * @return a Page object containing the list of users for the current page and the total number of users
+     */
     @Override
-    public Page<User> findAll(Pageable pageable) {
-        List<User> userList = new ArrayList<>();
-        try(Connection connection= DriverManager.getConnection(url,username,password);
-            PreparedStatement pagePreparedStatement=connection.prepareStatement("SELECT * FROM users " +
-                    "LIMIT ? OFFSET ?");
+    public Page<User> findAllOnPage(Pageable pageable) {
+        List<User> users = new ArrayList<>();
+        try(Connection connection = DriverManager.getConnection(url,username,password);
+            PreparedStatement pageStatement = connection.prepareStatement("SELECT * FROM users " + "LIMIT ? OFFSET ?");
+            PreparedStatement countStatement = connection.prepareStatement("SELECT COUNT(*) AS conut FROM users")
+        ){
+            pageStatement.setInt(1,pageable.getPageSize());
+            pageStatement.setInt(2,pageable.getPageNumber()*pageable.getPageSize());
+            try(ResultSet pageResultSet = pageStatement.executeQuery();
+                ResultSet countResultSet = countStatement.executeQuery()){
 
-            PreparedStatement countPreparedStatement = connection.prepareStatement
-                    ("SELECT COUNT(*) AS count FROM users ");
-
-        ) {
-            pagePreparedStatement.setInt(1, pageable.getPageSize());
-            pagePreparedStatement.setInt(2, pageable.getPageSize() * pageable.getPageNumber());
-            try (ResultSet pageResultSet = pagePreparedStatement.executeQuery();
-                 ResultSet countResultSet = countPreparedStatement.executeQuery(); ) {
-                while (pageResultSet.next()) {
+                while(pageResultSet.next()){
                     Long id = pageResultSet.getLong("user_id");
-                    String firstName = pageResultSet.getString("firstname");
-                    String lastName = pageResultSet.getString("lastname");
+                    String firstname = pageResultSet.getString("firstname");
+                    String lastname = pageResultSet.getString("lastname");
                     String email = pageResultSet.getString("email");
-                    String password = pageResultSet.getString("password");
-                    User user = new User(firstName, lastName, email,password);
-                    user.setId(id);
-                    userList.add(user);
-                }
-                int totalCount = 0;
-                if(countResultSet.next()) {
-                    totalCount = countResultSet.getInt("count");
-                }
+                    String password = pageResultSet.getString("pasword");
 
-                return new Page<>(userList, totalCount);
-
+                    User u = new User(firstname, lastname, email, password);
+                    u.setId(id);
+                    users.add(u);
+                }
+                int count = 0;
+                if(countResultSet.next()){
+                    count = countResultSet.getInt("count");
+                }
+                return new Page<>(users, count);
             }
+        }catch (SQLException e) {
+            e.printStackTrace();
         }
-        catch (SQLException e){
-            throw new RuntimeException(e);
-        }
+        return null;
     }
 
 }

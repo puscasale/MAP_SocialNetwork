@@ -28,7 +28,7 @@ public class HelloAplication extends Application {
         String url = "jdbc:postgresql://localhost:5432/postgres";
 
         Repository<Long, User> userRepoBD = new UserRepoBD(url, username, password, new UserValidator());
-        Repository<Tuple<Long, Long>, Friendship> friendshipRepoBD = new FriendshipsRepoBD(url, username, password);
+        FriendshipPagingRepo<Tuple<Long, Long>, Friendship> friendshipRepoBD = new FriendshipsRepoBD(url, username, password);
         Repository<Long, Message> messageRepoBD = new MessageRepoBD(userRepoBD,url, username, password);
         Service srv = new Service(userRepoBD, friendshipRepoBD, messageRepoBD);
 

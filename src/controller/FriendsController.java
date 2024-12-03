@@ -1,5 +1,8 @@
 package controller;
 
+import domain.Friendship;
+import domain.Page;
+import domain.Pageable;
 import domain.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,12 +13,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import service.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class FriendsController {
     @FXML
@@ -24,13 +29,17 @@ public class FriendsController {
     private Service service;
     private User loggedInUser;
 
-    private int currentPageUsers = 0;
-    private int pageSizeUsers = 5;
+    private int currentPage = 0;
+
+    private int pageSize = 5;
 
     @FXML
-    private Button nextBtnFriendships;
+    private Button previousButton;
     @FXML
-    private Button previousBtnFriendships;
+    private Button nextButton;
+
+    @FXML
+    private Label pageNumber;
 
     /**
      * Sets the service instance used for operations.
@@ -54,27 +63,66 @@ public class FriendsController {
      * It retrieves the list of friends from the service and displays their names.
      */
     private void loadFriendsList() {
-
         try {
+            Page<Friendship> pageFriends = service.findUsersFriends(new Pageable(pageSize, currentPage), loggedInUser);
 
-            List<User> friendships = service.getFriends(loggedInUser);
-
-
-            ObservableList<String> friendsNames = FXCollections.observableArrayList();
-
-
-            for (User friend : friendships) {
-                String fullName = friend.getFirstName() + " " + friend.getLastName();
-                friendsNames.add(fullName);
+            int totalFriends = pageFriends.getTotalElementCount();
+            int maximumFriends = (int) Math.ceil((double) totalFriends / pageSize) - 1;
+            if(maximumFriends == -1){
+                showAlert("You have no friends");
+                maximumFriends = 0;
             }
 
+            if (currentPage > maximumFriends) {
+                currentPage = maximumFriends;
+                pageFriends = service.findUsersFriends(new Pageable(pageSize, currentPage), loggedInUser);
+            }
 
-            friendsListView.setItems(friendsNames);
+            int nrOfElements = pageFriends.getTotalElementCount();
+            previousButton.setDisable(currentPage == 0);
+            nextButton.setDisable((currentPage + 1) * pageSize >= nrOfElements);
+
+            ObservableList<String> friends = FXCollections.observableArrayList();
+            for (Friendship friendship : pageFriends.getElementsOnPage()) {
+                User friend = friendship.getIdUser1().equals(loggedInUser.getId())
+                        ? service.find_user(friendship.getIdUser2()).get()
+                        : service.find_user(friendship.getIdUser1()).get();
+                String fullName = friend.getFirstName() + " " + friend.getLastName();
+                friends.add(fullName);
+            }
+
+            friendsListView.setItems(friends);
+            pageNumber.setText((currentPage + 1) + " / " + (maximumFriends + 1));
+
         } catch (Exception e) {
             showAlert("An error occurred while loading your friends list.");
             e.printStackTrace();
         }
     }
+
+
+    /**
+     * Handles the action when the "Next" button is clicked.
+     * Increases the current page number and reloads the friends list for the next page.
+     *
+     * @return void
+     */
+    public void onButtonNextClicked(){
+        currentPage++;
+        loadFriendsList();
+    }
+
+    /**
+     * Handles the action when the "Previous" button is clicked.
+     * Decreases the current page number and reloads the friends list for the previous page.
+     *
+     * @return void
+     */
+    public void onButtonPreviousClicked(){
+        currentPage--;
+        loadFriendsList();
+    }
+
 
     /**
      * Removes a selected friend from the friends list.

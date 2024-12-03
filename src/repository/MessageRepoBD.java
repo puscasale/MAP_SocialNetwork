@@ -9,7 +9,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class MessageRepoBD implements MessagePagingRepo<Long, Message> {
+public class MessageRepoBD implements Repository<Long, Message> {
     private static String url; // Database connection URL
     private static String username; // Database username
     private static String password; // Database password
@@ -231,61 +231,6 @@ public class MessageRepoBD implements MessagePagingRepo<Long, Message> {
         return Optional.of(entity);
     }
 
-    @Override
-    public Page<Message> findAll(Pageable pageable, Long user1Id, Long user2Id) {
-        try (Connection connection = DriverManager.getConnection(url, username, password);
-             PreparedStatement pagePreparedStatement = connection.prepareStatement
-                     ("SELECT messages.*, message_recipients.id_to " +
-                             "FROM messages " +
-                             "LEFT JOIN message_recipients ON messages.id = message_recipients.id_message " +
-                             "WHERE (messages.id_from = ? AND message_recipients.id_to = ?) " +
-                             "OR (messages.id_from = ? AND message_recipients.id_to = ?) " +
-                             "LIMIT ? OFFSET ?");
 
-             PreparedStatement countPreparedStatement = connection.prepareStatement
-                     ("SELECT COUNT(*) AS count " +
-                             "FROM messages " +
-                             "LEFT JOIN message_recipients ON messages.id = message_recipients.id_message " +
-                             "WHERE (messages.id_from = ? AND message_recipients.id_to = ?) " +
-                             "OR (messages.id_from = ? AND message_recipients.id_to = ?) ");
-
-        ) {
-            pagePreparedStatement.setLong(1, user1Id);
-            pagePreparedStatement.setLong(2, user2Id);
-            pagePreparedStatement.setLong(3, user2Id);
-            pagePreparedStatement.setLong(4, user1Id);
-            pagePreparedStatement.setInt(5, pageable.getPageSize());
-            pagePreparedStatement.setInt(6, pageable.getPageSize() * pageable.getPageNumber());
-
-            countPreparedStatement.setLong(1, user1Id);
-            countPreparedStatement.setLong(2, user2Id);
-            countPreparedStatement.setLong(3, user2Id);
-            countPreparedStatement.setLong(4, user1Id);
-            try (ResultSet pageResultSet = pagePreparedStatement.executeQuery();
-                 ResultSet countResultSet = countPreparedStatement.executeQuery();) {
-
-                Map<Long, Message> messageMap = new HashMap<>();
-
-                while (pageResultSet.next()) {
-                    Long messageId = pageResultSet.getLong("id");
-                    messageMap.computeIfAbsent(messageId, k -> {
-                        return findOne(messageId).get();
-                    });
-
-                }
-
-                List<Message> messageList = new ArrayList<>(messageMap.values());
-                int totalCount = 0;
-                if (countResultSet.next()) {
-                    totalCount = countResultSet.getInt("count");
-                }
-
-                return new Page<>(messageList, totalCount);
-
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 }

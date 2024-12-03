@@ -67,6 +67,12 @@ public class MainController {
         }
     }
 
+    /**
+     * Checks if the logged-in user has any new pending friend requests.
+     * If there are new requests, it triggers the display of a notification showing the details of the requests.
+     *
+     * @return void
+     */
     private void checkNewFriendRequests() {
         List<Friendship> newRequests = service.getPendingFriendships(loggedInUser.getId());
 
@@ -75,6 +81,13 @@ public class MainController {
         }
     }
 
+    /**
+     * Displays a notification showing the details of new friend requests.
+     * The notification lists the names of the users who have sent the pending requests.
+     *
+     * @param newRequests a List of pending Friendship objects to be displayed in the notification
+     * @return void
+     */
     private void showNewFriendRequestNotification(List<Friendship> newRequests) {
         StringBuilder notificationMessage = new StringBuilder("From:\n");
 
