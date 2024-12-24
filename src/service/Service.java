@@ -9,6 +9,8 @@ import repository.FriendshipPagingRepo;
 import repository.Repository;
 
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,7 +76,22 @@ public class Service {
      */
     public void addUser(User user) {
         userValidator.validate(user);
+
+        // Hash password before saving
+        String hashedPassword = hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+
         userRepo.save(user);
+    }
+
+    public String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(password.getBytes());
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password", e);
+        }
     }
 
     /**
@@ -247,13 +264,15 @@ public class Service {
      * @return the User object if credentials are valid, null otherwise
      */
     public User login(String email, String password) {
+        String hashedPassword = hashPassword(password);
         for (User user : userRepo.findAll()) {
-            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
+            if (user.getEmail().equals(email) && user.getPassword().equals(hashedPassword)) {
                 return user; // Return user if email and password match
             }
         }
         return null; // Return null if no matching user is found
     }
+
 
     /**
      * Retrieves the list of friends for a given user.

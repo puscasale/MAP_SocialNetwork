@@ -68,6 +68,10 @@ public class User extends Entity<Long> {
         this.lastName = lastName;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     /**
      * Retrieves the list of friends of the user.
      * @return a list containing the user's friends

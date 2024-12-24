@@ -31,7 +31,7 @@ public class FriendsController {
 
     private int currentPage = 0;
 
-    private int pageSize = 5;
+    private int pageSize = 3;
 
     @FXML
     private Button previousButton;

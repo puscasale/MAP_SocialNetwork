@@ -278,8 +278,10 @@ public class MainController {
     public void handleChangePassword(ActionEvent actionEvent) {
         String newPassword = text_field.getText();
 
+
         if (newPassword != null && !newPassword.isEmpty()) {
-            User u = new User(loggedInUser.getFirstName(), loggedInUser.getLastName(), loggedInUser.getEmail(), newPassword);
+            String hashedPassword = service.hashPassword(newPassword);
+            User u = new User(loggedInUser.getFirstName(), loggedInUser.getLastName(), loggedInUser.getEmail(), hashedPassword);
             u.setId(loggedInUser.getId());
 
             service.update_user(u);
